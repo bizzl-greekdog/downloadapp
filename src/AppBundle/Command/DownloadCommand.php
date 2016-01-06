@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\LockHandler;
 
 /**
  * Console command to download a number of files listed in the downloads table.
@@ -38,6 +39,11 @@ class DownloadCommand extends Command implements ContainerAwareInterface
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $lock = new LockHandler('app:download');
+        if (!$lock->lock()) {
+            $output->writeln('Downloads already in progress');
+            return 0;
+        }
         $directory = $this->getContainer()->getParameter('download_directory');
         $number = $input->getArgument('number');
         $number = ($number === 'all') ? null : (int)$number;
@@ -62,6 +68,7 @@ class DownloadCommand extends Command implements ContainerAwareInterface
             $em->persist($download);
         }
         $em->flush();
+        $lock->release();
     }
 
     /**
