@@ -5,6 +5,7 @@ namespace AppBundle\Command;
 use Guzzle\Http\Client;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\LockHandler;
 
@@ -22,7 +23,7 @@ class DownloadCommand extends ContainerAwareCommand
         $this
             ->setName('app:download')
             ->setDescription('Download a number of files')
-            ->addArgument('number', null, 'Number of files to download', 5);
+            ->addOption('count', 'c', InputOption::VALUE_OPTIONAL, 'Number of files to download', 5);
     }
 
     /**
@@ -32,13 +33,14 @@ class DownloadCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $lock = new LockHandler('app:download');
+        $lock = new LockHandler($this->getName());
         if (!$lock->lock()) {
-            $output->writeln('Downloads already in progress');
-            return 0;
+            $output->writeln($this->getName() . ' already in progress');
+            return -1;
         }
+
         $directory = $this->getContainer()->getParameter('download_directory');
-        $number = $input->getArgument('number');
+        $number = $input->getOption('count');
         $number = ($number === 'all') ? null : (int)$number;
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $repo = $em->getRepository('AppBundle:Download');
@@ -61,6 +63,7 @@ class DownloadCommand extends ContainerAwareCommand
             $em->persist($download);
         }
         $em->flush();
+
         $lock->release();
         return 0;
     }
