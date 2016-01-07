@@ -3,24 +3,17 @@
 namespace AppBundle\Command;
 
 use Guzzle\Http\Client;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\LockHandler;
 
 /**
  * Console command to download a number of files listed in the downloads table.
  * @package AppBundle\Command
  */
-class DownloadCommand extends Command implements ContainerAwareInterface
+class DownloadCommand extends ContainerAwareCommand
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container = null;
-
     /**
      * Setup routine.
      */
@@ -69,24 +62,7 @@ class DownloadCommand extends Command implements ContainerAwareInterface
         }
         $em->flush();
         $lock->release();
-    }
-
-    /**
-     * Get the container.
-     * @return ContainerInterface
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
-     * Sets the container.
-     * @param ContainerInterface|null $container A ContainerInterface instance or null
-     */
-    public function setContainer(ContainerInterface $container = null)
-    {
-        $this->container = $container;
+        return 0;
     }
 
     /**
