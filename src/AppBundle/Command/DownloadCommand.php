@@ -54,8 +54,12 @@ class DownloadCommand extends ContainerAwareCommand
             ->getResult();
         foreach ($downloadIds as $downloadId) {
             $download = $repo->find($downloadId['id']);
-            $filePath = $directory . DIRECTORY_SEPARATOR . $download->getFilename();
+            $saveFilename = $this->makeFilenameSave($download->getFilename());
+            $filePath = $directory . DIRECTORY_SEPARATOR . $saveFilename;
             $output->write('Downloading ' . $download->getFilename());
+            if ($saveFilename != $download->getFilename()) {
+                $output->write(" as $saveFilename");
+            }
             $this->download($download->getUrl(), $filePath, $download->getReferer());
             file_put_contents($filePath . '.txt', $download);
             $output->writeln("   <info>Done</info>");
@@ -66,6 +70,21 @@ class DownloadCommand extends ContainerAwareCommand
 
         $lock->release();
         return 0;
+    }
+
+    private function makeFilenameSave($inFilename)
+    {
+        $directory = $this->getContainer()->getParameter('download_directory');
+        if (!file_exists("$directory/$inFilename")) {
+            return $inFilename;
+        }
+        $i = 1;
+        $extension = pathinfo($inFilename, PATHINFO_EXTENSION);
+        $basename = pathinfo($inFilename, PATHINFO_FILENAME);
+        while (file_exists("$directory/$basename.$i.$extension")) {
+            $i++;
+        }
+        return "$basename.$i.$extension";
     }
 
     /**

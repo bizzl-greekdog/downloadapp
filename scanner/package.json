@@ -1,0 +1,12 @@
+{
+  "name": "image-download-scanner",
+  "version": "1.0.0",
+  "license": {
+    "type": "MIT"
+  },
+  "dependencies": {
+    "casperjs": "~1.1.0-beta3",
+    "yamljs": "0.2.4",
+    "slimerjs": "0.9.6-2"
+  }
+}

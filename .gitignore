@@ -13,3 +13,4 @@
 /.idea
 *.db
 *.db3
+node_modules

@@ -20,3 +20,15 @@ parameters:
 
     # Directory to download to
     download_directory: ~
+
+    # engine used by casperjs
+    scanner_engine:    phantomjs
+
+    # config for some scanners
+    scanners:
+      deviantart:
+        user: ~
+        password: ~
+      furaffinity:
+        user: ~
+        password: ~

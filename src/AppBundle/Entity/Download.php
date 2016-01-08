@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @package AppBundle\Entity
  * @ORM\Entity
  * @ORM\Table(name="downloads")
+ * @ORM\HasLifecycleCallbacks
  */
 class Download
 {
@@ -36,7 +37,7 @@ class Download
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=1024)
      */
     private $referer = '';
 
@@ -59,6 +60,11 @@ class Download
     private $created = null;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", length=32, nullable=true)
+     */
+    private $checksum = null;
+    /**
      * @var Metadatum[]
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Metadatum", mappedBy="download", cascade={"persist", "remove"}, orphanRemoval=true)
      */
@@ -74,29 +80,22 @@ class Download
     }
 
     /**
+     * @return string
+     */
+    public function getChecksum()
+    {
+        if (!isset($this->checksum)) {
+            $this->calculateChecksum();
+        }
+        return $this->checksum;
+    }
+
+    /**
      * @return \DateTime
      */
     public function getCreated()
     {
         return $this->created;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl()
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     * @return Download
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
-        return $this;
     }
 
     /**
@@ -118,42 +117,6 @@ class Download
     }
 
     /**
-     * @return string
-     */
-    public function getReferer()
-    {
-        return $this->referer;
-    }
-
-    /**
-     * @param string $referer
-     * @return Download
-     */
-    public function setReferer($referer)
-    {
-        $this->referer = $referer;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getComment()
-    {
-        return $this->comment;
-    }
-
-    /**
-     * @param string $comment
-     * @return Download
-     */
-    public function setComment($comment)
-    {
-        $this->comment = $comment;
-        return $this;
-    }
-
-    /**
      * @return boolean
      */
     public function isDownloaded()
@@ -168,6 +131,7 @@ class Download
     public function setDownloaded($downloaded)
     {
         $this->downloaded = $downloaded;
+        $this->checksum = null;
         return $this;
     }
 
@@ -201,6 +165,54 @@ class Download
         return $this->metadata;
     }
 
+    /**
+     * @ORM\PrePersist
+     */
+    public function calculateChecksum()
+    {
+        $this->checksum = md5($this->getUrl() . $this->getReferer());
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param string $url
+     * @return Download
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+        $this->checksum = null;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReferer()
+    {
+        return $this->referer;
+    }
+
+    /**
+     * @param string $referer
+     * @return Download
+     */
+    public function setReferer($referer)
+    {
+        $this->referer = $referer;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
         $result = [];
@@ -210,5 +222,23 @@ class Download
         $result[] = '======================================';
         $result[] = $this->getComment();
         return implode(PHP_EOL, $result);
+    }
+
+    /**
+     * @return string
+     */
+    public function getComment()
+    {
+        return $this->comment;
+    }
+
+    /**
+     * @param string $comment
+     * @return Download
+     */
+    public function setComment($comment)
+    {
+        $this->comment = $comment;
+        return $this;
     }
 }
