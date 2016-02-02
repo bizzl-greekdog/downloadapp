@@ -1,1 +1,30 @@
-Hello World!
+{% extends '::base.html.twig' %}
+
+{% block body %}
+    <table>
+        {# @var download \AppBundle\Entity\Download #}
+        {% for download in downloads %}
+            <tr{% if download.downloaded %}class="downloaded"{% endif %}>
+                <td><span class="fa {{ download.mimetype|faFileIcon }}">&nbsp;</span></td>
+                <td>
+                    <p>{{ download.filename }}</p>
+                    <small>From {{ download.referer }}</small>
+                </td>
+                <td>
+                    <a href="{{ path('app_download', {'id': download.id}) }}" class="fa fa-play"></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% if firstPage %}
+        <span>&lt;</span>
+    {% else %}
+        <a href="/{{ page - 1 }}">&lt;</a>
+    {% endif %}
+    {{ page }}
+    {% if lastPage %}
+        <span>&gt;</span>
+    {% else %}
+        <a href="/{{ page + 1 }}">&gt;</a>
+    {% endif %}
+{% endblock %}

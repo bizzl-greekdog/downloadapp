@@ -16,6 +16,32 @@ use Symfony\Component\Filesystem\LockHandler;
 class DownloadCommand extends ContainerAwareCommand
 {
     /**
+     * @param OutputInterface $output
+     * @param $repo
+     * @param $downloadId
+     * @param $directory
+     * @param $em
+     */
+    public function download(OutputInterface $output, $downloadId)
+    {
+        $directory = $this->getContainer()->getParameter('download_directory');
+        $em = $this->getContainer()->get('doctrine.orm.entity_manager');
+        $repo = $em->getRepository('AppBundle:Download');
+        $download = $repo->find($downloadId);
+        $saveFilename = $this->makeFilenameSave($download->getFilename());
+        $filePath = $directory . DIRECTORY_SEPARATOR . $saveFilename;
+        $output->write('Downloading ' . $download->getFilename());
+        if ($saveFilename != $download->getFilename()) {
+            $output->write(" as $saveFilename");
+        }
+        $this->downloadUrl($download->getUrl(), $filePath, $download->getReferer());
+        file_put_contents($filePath . '.txt', $download);
+        $output->writeln("   <info>Done</info>");
+        $download->setDownloaded(true);
+        $em->persist($download);
+    }
+
+    /**
      * Setup routine.
      */
     protected function configure()
@@ -53,18 +79,7 @@ class DownloadCommand extends ContainerAwareCommand
             ->getQuery()
             ->getResult();
         foreach ($downloadIds as $downloadId) {
-            $download = $repo->find($downloadId['id']);
-            $saveFilename = $this->makeFilenameSave($download->getFilename());
-            $filePath = $directory . DIRECTORY_SEPARATOR . $saveFilename;
-            $output->write('Downloading ' . $download->getFilename());
-            if ($saveFilename != $download->getFilename()) {
-                $output->write(" as $saveFilename");
-            }
-            $this->download($download->getUrl(), $filePath, $download->getReferer());
-            file_put_contents($filePath . '.txt', $download);
-            $output->writeln("   <info>Done</info>");
-            $download->setDownloaded(true);
-            $em->persist($download);
+            $this->download($output, $downloadId['id']);
         }
         $em->flush();
 
@@ -93,7 +108,7 @@ class DownloadCommand extends ContainerAwareCommand
      * @param string $target
      * @param string|null $referer
      */
-    private function download($url, $target, $referer = null)
+    private function downloadUrl($url, $target, $referer = null)
     {
         static $client = null;
         if (!isset($client)) {

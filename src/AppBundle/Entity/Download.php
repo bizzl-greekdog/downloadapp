@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Karwana\Mime\Mime;
 
 /**
  * Class Download
@@ -240,5 +241,15 @@ class Download
     {
         $this->comment = $comment;
         return $this;
+    }
+
+    public function getMimetype()
+    {
+        return Mime::getTypeForExtension($this->getExtension());
+    }
+
+    public function getExtension()
+    {
+        return pathinfo($this->getFilename(), PATHINFO_EXTENSION);
     }
 }
