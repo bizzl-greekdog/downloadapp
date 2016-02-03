@@ -187,7 +187,7 @@
   };
 
   LoopyCasper.prototype.getJSON = function() {
-    return JSON.parse(this.getPageContent());
+    return JSON.parse(this.page.plainText);
   };
 
   LoopyCasper.prototype.tryAnyOfThese = function(things, default_) {

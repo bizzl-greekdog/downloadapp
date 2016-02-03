@@ -50,15 +50,16 @@
           return this.goto('VIEW');
         } else if (-1 < url.indexOf('apod/astropix')) {
           this.open(url);
-          this.then(function() {
+          return this.then(function() {
             var num;
             num = this.getElementAttribute(this.x('html/body/center[3]/a[text() = \'<\']'), 'href');
             num = parseInt(num.slice(2, -5), 10) + 1;
-            return downloadQueue.push("http://apod.nasa.gov/apod/ap" + num + ".html");
+            downloadQueue.push("http://apod.nasa.gov/apod/ap" + num + ".html");
+            return this.goto('ANALYZE');
           });
-          return this.goto('ANALYZE');
         } else {
-          return downloadQueue.push(url);
+          downloadQueue.push(url);
+          return this.goto('ANALYZE');
         }
       });
       this.label('VIEW');

@@ -66,7 +66,9 @@
         } else if (url === 'deviantart:watchlist') {
           patternUrl = new moreUtilities.PatternUrl('http://my.deviantart.com/global/difi/?c[]="MessageCenter","get_views",[284144,"oq:devwatch:%i:24:b:tg=deviations"]&t=json', 0, 24);
           this.open(patternUrl.nextPage());
-          return this.goto('WATCHLIST');
+          return this.then(function() {
+            return this.goto('WATCHLIST');
+          });
         } else {
           path = url.split('/');
           if (path[3] === 'art') {
@@ -77,7 +79,9 @@
             scraps = false;
             patternUrl = new moreUtilities.PatternUrl('http://' + username + '.deviantart.com/global/difi/?c[]=Resources;htmlFromQuery;gallery%3A' + username + '%20sort%3Atime,%i,24,thumb150,artist%3A0&t=json', 0, 24);
             this.open(patternUrl.nextPage());
-            return this.goto('GALLERY');
+            return this.then(function() {
+              return this.goto('GALLERY');
+            });
           }
         }
       });
@@ -93,17 +97,21 @@
             patternUrl = new moreUtilities.PatternUrl('http://' + username + '.deviantart.com/global/difi/?c[]=Resources;htmlFromQuery;gallery%3A' + username + '%20sort%3Atime%20in%3Ascraps,%i,24,thumb150,artist%3A0&t=json', 0, 24);
             scraps = true;
             this.open(patternUrl.nextPage());
-            return this.goto('GALLERY');
+            return this.then(function() {
+              return this.goto('GALLERY');
+            });
           }
         } else {
           json.DiFi.response.calls[0].response.content.resources.forEach(function(item, key, resources) {
             if (!item[2]) {
               return;
             }
-            return downloadQueue.push(item[2].match(/http:\/\/[^"]*?\.deviantart\.com\/art\/[^"]+/));
+            return downloadQueue.push(item[2].match(/http:\/\/[^"]*?\.deviantart\.com\/art\/[^"]+/)[0]);
           });
           this.open(patternUrl.nextPage());
-          return this.goto('GALLERY');
+          return this.then(function() {
+            return this.goto('GALLERY');
+          });
         }
       });
       this.label('WATCHLIST');
@@ -117,7 +125,9 @@
             return downloadQueue.push(hit.url);
           });
           this.open(patternUrl.nextPage());
-          return this.goto('WATCHLIST');
+          return this.then(function() {
+            return this.goto('WATCHLIST');
+          });
         }
       });
       this.label('VIEW');

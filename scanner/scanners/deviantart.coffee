@@ -58,7 +58,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
       else if url == 'deviantart:watchlist'
         patternUrl = new moreUtilities.PatternUrl 'http://my.deviantart.com/global/difi/?c[]="MessageCenter","get_views",[284144,"oq:devwatch:%i:24:b:tg=deviations"]&t=json', 0, 24
         @open patternUrl.nextPage()
-        @goto 'WATCHLIST'
+        @then ->
+          @goto 'WATCHLIST'
       else
         path = url.split '/'
         if path[3] == 'art'
@@ -69,7 +70,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           scraps = false
           patternUrl = new moreUtilities.PatternUrl 'http://' + username + '.deviantart.com/global/difi/?c[]=Resources;htmlFromQuery;gallery%3A' + username + '%20sort%3Atime,%i,24,thumb150,artist%3A0&t=json', 0, 24
           @open patternUrl.nextPage()
-          @goto 'GALLERY'
+          @then ->
+            @goto 'GALLERY'
     @label 'GALLERY'
     @then ->
       username = @getCurrentUrl().split('/')[2].split('.')[0]
@@ -81,14 +83,16 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           patternUrl = new moreUtilities.PatternUrl 'http://' + username + '.deviantart.com/global/difi/?c[]=Resources;htmlFromQuery;gallery%3A' + username + '%20sort%3Atime%20in%3Ascraps,%i,24,thumb150,artist%3A0&t=json', 0, 24
           scraps = true
           @open patternUrl.nextPage()
-          @goto 'GALLERY'
+          @then ->
+            @goto 'GALLERY'
       else
         json.DiFi.response.calls[0].response.content.resources.forEach (item, key, resources) ->
           if !item[2]
             return
-          downloadQueue.push item[2].match(/http:\/\/[^"]*?\.deviantart\.com\/art\/[^"]+/)
+          downloadQueue.push item[2].match(/http:\/\/[^"]*?\.deviantart\.com\/art\/[^"]+/)[0]
         @open patternUrl.nextPage()
-        @goto 'GALLERY'
+        @then ->
+            @goto 'GALLERY'
     @label 'WATCHLIST'
     @then ->
       json = @getJSON()
@@ -98,7 +102,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
         json.DiFi.response.calls[0].response.content[0].result.hits.forEach (hit, key, hits) ->
           downloadQueue.push hit.url
         @open patternUrl.nextPage()
-        @goto 'WATCHLIST'
+        @then ->
+          @goto 'WATCHLIST'
     @label 'VIEW'
     @then ->
       url = downloadQueue.shift()

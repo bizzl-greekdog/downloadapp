@@ -158,7 +158,7 @@ LoopyCasper.prototype.printf = ->
   @echo f.apply utils, arguments
 
 LoopyCasper.prototype.getJSON = ->
-  JSON.parse @getPageContent()
+  JSON.parse @page.plainText
 
 LoopyCasper.prototype.tryAnyOfThese = (things, default_) ->
   for thing in things

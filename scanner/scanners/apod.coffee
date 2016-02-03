@@ -49,9 +49,10 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           num = @getElementAttribute(@x('html/body/center[3]/a[text() = \'<\']'), 'href')
           num = parseInt(num[2..-6], 10)+1
           downloadQueue.push "http://apod.nasa.gov/apod/ap#{num}.html"
-        @goto 'ANALYZE'
+          @goto 'ANALYZE'
       else
         downloadQueue.push url
+        @goto 'ANALYZE'
     @label 'VIEW'
     @then ->
       url = downloadQueue.shift()
