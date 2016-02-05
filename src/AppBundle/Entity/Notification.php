@@ -84,6 +84,7 @@ class Notification implements \JsonSerializable
             'text'    => $this->text,
             'url'     => $this->url,
             'referer' => $this->referer,
+            'id'      => $this->id,
         ];
     }
 

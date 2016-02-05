@@ -17,6 +17,26 @@ class ScanCommand extends ContainerAwareCommand
 {
     private $pathes = [];
 
+    private $notificationCallback = null;
+
+    /**
+     * @return null
+     */
+    public function getNotificationCallback()
+    {
+        return $this->notificationCallback;
+    }
+
+    /**
+     * @param null $notificationCallback
+     * @return $this
+     */
+    public function setNotificationCallback($notificationCallback)
+    {
+        $this->notificationCallback = $notificationCallback;
+        return $this;
+    }
+
     protected function configure()
     {
         $this
@@ -111,6 +131,7 @@ class ScanCommand extends ContainerAwareCommand
             ->add($referer);
 
         $process = $processBuilder->getProcess();
+        $process->setTimeout(null);
         $logger->debug($process->getCommandLine());
         $process->run();
 
@@ -192,7 +213,12 @@ class ScanCommand extends ContainerAwareCommand
             ->setText("{$results['saved']} saved, {$results['skipped']} skipped")
             ->setUrl($url)
             ->setReferer($referer);
+
         $this->getContainer()->get('doctrine.orm.entity_manager')->persist($notification);
+        if (is_callable($this->getNotificationCallback())) {
+            $this->getContainer()->get('doctrine.orm.entity_manager')->flush();
+            call_user_func($this->getNotificationCallback(), $notification);
+        }
         $this->getContainer()->get('logger')->info($notification->getText());
     }
 
@@ -205,7 +231,12 @@ class ScanCommand extends ContainerAwareCommand
             ->setText("Failed to scan {$url}")
             ->setUrl($url)
             ->setReferer($referer);
+
         $this->getContainer()->get('doctrine.orm.entity_manager')->persist($notification);
+        if (is_callable($this->getNotificationCallback())) {
+            $this->getContainer()->get('doctrine.orm.entity_manager')->flush();
+            call_user_func($this->getNotificationCallback(), $notification);
+        }
         $this->getContainer()->get('logger')->error($notification->getText() . " (Referer: {$referer})");
     }
 
