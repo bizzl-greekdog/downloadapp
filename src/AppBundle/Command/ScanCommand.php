@@ -43,6 +43,7 @@ class ScanCommand extends ContainerAwareCommand
             ->setName('app:scan')
             ->setDescription('Scan a url and referer for downloads, or process a number of urls from the queue')
             ->addOption('count', 'c', InputOption::VALUE_OPTIONAL, 'Number of entries to process (will be ignored if url is set)', 5)
+            ->addOption('no-lock', '', InputOption::VALUE_NONE, 'Disable locking')
             ->addArgument('url', null, 'url to scan', false)
             ->addArgument('referer', null, 'referer to include in scan', false);
     }
@@ -50,7 +51,7 @@ class ScanCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $lock = new LockHandler($this->getName());
-        if (!$lock->lock()) {
+        if (!$input->getOption('no-lock') && !$lock->lock()) {
             $output->writeln($this->getName() . ' already in progress');
             return -1;
         }
