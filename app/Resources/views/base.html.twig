@@ -6,9 +6,15 @@
         {% block stylesheets %}{% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
         <link rel="stylesheet" href="{{ asset('components/font-awesome/css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('stylesheets/screen.css') }}">
+        <!--[if IE]>
+           <link href="{{ asset('stylesheets/ie.css') }}" media="screen, projection" rel="stylesheet" type="text/css" />
+        <![endif]-->
     </head>
     <body>
+        {% block header %}{% endblock %}
         {% block body %}{% endblock %}
+        {% block footer %}{% endblock %}
         {% block javascripts %}{% endblock %}
     </body>
 </html>

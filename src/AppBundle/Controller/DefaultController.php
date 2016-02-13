@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-    const PAGE_SIZE = 8;
+    const PAGE_SIZE = 15;
 
     public function allAction($page)
     {
@@ -56,12 +56,13 @@ class DefaultController extends Controller
         return $this->render(
             'AppBundle:Default:index.html.twig',
             [
-                'page'      => $page,
-                'firstPage' => $page == 1,
-                'lastPage'  => $page == $pageCount,
-                'downloads' => $downloads,
-                'total'     => $total,
-                'pageCount' => $pageCount,
+                'page'           => $page,
+                'firstPage'      => $page == 1,
+                'lastPage'       => $page == $pageCount,
+                'downloads'      => $downloads,
+                'total'          => $total,
+                'pageCount'      => $pageCount,
+                'showDownloaded' => $showDownloaded,
             ]
         );
     }

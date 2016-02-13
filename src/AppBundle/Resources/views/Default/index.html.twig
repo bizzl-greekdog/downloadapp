@@ -6,29 +6,37 @@
             {# @var download \AppBundle\Entity\Download #}
             {% for download in downloads %}
                 <tr class="{{ cycle(['odd', 'even'], loop.index) }}{% if download.downloaded %} downloaded{% endif %}">
-                    <td><span class="fa {{ download.mimetype|faFileIcon }}">&nbsp;</span></td>
+                    <td class="icon"><span class="fa {{ download.mimetype|faFileIcon }}"></span></td>
                     <td>
                         <p>{{ download.filename }}</p>
                         <small>From {{ download.referer }}</small>
                     </td>
-                    <td>
+                    <td class="action">
                         <a href="{{ path('app_download', {id: download.id}) }}" class="fa fa-play"></a>
                     </td>
                 </tr>
             {% endfor %}
         </table>
     </main>
-    <nav>
+    <footer>
         {% if firstPage %}
             <span class="fa fa-chevron-left disabled"></span>
         {% else %}
-            <a href="{{ path('app_list_downloads', {page: page-1}) }}" class="fa fa-chevron-left"></a>
+            {% if showDownloaded %}
+                <a href="{{ path('app_list_all_downloads', {page: page-1}) }}" class="fa fa-chevron-left"></a>
+            {% else %}
+                <a href="{{ path('app_list_downloads', {page: page-1}) }}" class="fa fa-chevron-left"></a>
+            {% endif %}
         {% endif %}
-        {{ page }}
+        {{ page }} of {{ pageCount }}
         {% if lastPage %}
             <span class="fa fa-chevron-right disabled"></span>
         {% else %}
-            <a href="{{ path('app_list_downloads', {page: page+1}) }}" class="fa fa-chevron-right"></a>
+            {% if showDownloaded %}
+                <a href="{{ path('app_list_all_downloads', {page: page+1}) }}" class="fa fa-chevron-right"></a>
+            {% else %}
+                <a href="{{ path('app_list_downloads', {page: page+1}) }}" class="fa fa-chevron-right"></a>
+            {% endif %}
         {% endif %}
-    </nav>
+    </footer>
 {% endblock %}

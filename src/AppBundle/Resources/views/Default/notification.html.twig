@@ -4,13 +4,16 @@
     #{{ notification.id }} - {{ notification.title }} -
 {% endblock %}
 
-{% block body %}
-    <nav>
+{% block header %}
+    <header>
         <a href="{{ path('app_list_downloads', {page: 1}) }}"><span class="fa fa-arrow-left"></span> Overview</a>
-    </nav>
+    </header>
+{% endblock %}
+
+{% block body %}
     <main class="notification {{ notification.type }}">
         <p>{{ notification.text }}</p>
-        <code>URL: {{ notification.url }}</code><br/>
-        <code>Referer: {{ notification.referer }}</code>
+        <code>URL: <a href="{{ notification.url }}">{{ notification.url }}</a></code><br/>
+        <code>Referer: <a href="{{ notification.referer }}">{{ notification.referer }}</a></code>
     </main>
 {% endblock %}
