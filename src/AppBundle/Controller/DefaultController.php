@@ -74,4 +74,14 @@ class DefaultController extends Controller
         $this->get('doctrine.orm.entity_manager')->flush();
         return $this->redirect($request->headers->get('referer'));
     }
+
+    public function notificationAction($id)
+    {
+        $notification = $this
+            ->container
+            ->get('doctrine.orm.entity_manager')
+            ->getRepository('AppBundle:Notification')
+            ->find($id);
+        return $this->render('AppBundle:Default:notification.html.twig', ['notification' => $notification]);
+    }
 }

@@ -1,9 +1,15 @@
 app_list_downloads:
     path:     /{page}
     defaults: { _controller: AppBundle:Default:index, page: 1 }
+
 app_list_all_downloads:
     path: /all/{page}
     defaults: { _controller: AppBundle:Default:all, page: 1 }
+
 app_download:
     path: /download/{id}
     defaults: { _controller: AppBundle:Default:download }
+
+app_notification:
+    path: /notification/{id}
+    defaults: { _controller: AppBundle:Default:notification, id: -1 }

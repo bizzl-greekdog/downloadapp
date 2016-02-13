@@ -1,0 +1,16 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}
+    #{{ notification.id }} - {{ notification.title }} -
+{% endblock %}
+
+{% block body %}
+    <nav>
+        <a href="{{ path('app_list_downloads', {page: 1}) }}"><span class="fa fa-arrow-left"></span> Overview</a>
+    </nav>
+    <main class="notification {{ notification.type }}">
+        <p>{{ notification.text }}</p>
+        <code>URL: {{ notification.url }}</code><br/>
+        <code>Referer: {{ notification.referer }}</code>
+    </main>
+{% endblock %}

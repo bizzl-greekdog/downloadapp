@@ -87,7 +87,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
     {
         $this->output->writeln($msg);
         $msg = json_decode($msg);
-        $input = new ArrayInput(['url' => $msg->url, 'referer' => $msg->referer]);
+        $input = new ArrayInput(['url' => $msg->url, 'referer' => $msg->referer, 'no-lock']);
         $scanCommand = new ScanCommand();
         $scanCommand->setContainer($this->container);
         $returnValue = $scanCommand

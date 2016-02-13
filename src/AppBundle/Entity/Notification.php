@@ -49,7 +49,6 @@ class Notification implements \JsonSerializable
      * @ORM\Column(type="string", length=1024)
      */
     private $referer = '';
-
     /**
      * @var \DateTime
      * @ORM\Column(type="datetime")
@@ -62,6 +61,22 @@ class Notification implements \JsonSerializable
     public function __construct()
     {
         $this->created = new \DateTime();
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreated()
+    {
+        return $this->created;
     }
 
     function __toString()
