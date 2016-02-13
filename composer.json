@@ -1,6 +1,6 @@
 {
-    "name": "benjamin/.checkout",
-    "license": "proprietary",
+    "name": "bizzl/download-app",
+    "license": "MIT",
     "type": "project",
     "autoload": {
         "psr-4": {
@@ -24,7 +24,9 @@
         "doctrine/doctrine-fixtures-bundle": "2.3.0",
         "guzzle/guzzle": "v3.9.3",
         "karwana/mime": "1.0.0",
-        "cboden/ratchet": "v0.3.4"
+        "cboden/ratchet": "v0.3.4",
+        "components/font-awesome": "~4.5",
+        "robloach/component-installer": "0.2.3"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",
@@ -49,7 +51,8 @@
         ]
     },
     "config": {
-        "bin-dir": "bin"
+        "bin-dir": "bin",
+        "component-dir": "web/components"
     },
     "extra": {
         "symfony-app-dir": "app",
