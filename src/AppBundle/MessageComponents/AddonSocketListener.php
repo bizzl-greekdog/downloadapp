@@ -9,15 +9,14 @@
 namespace AppBundle\MessageComponents;
 
 
-use AppBundle\Command\ScanCommand;
-use AppBundle\Entity\Notification;
+use AppBundle\Utilities\ProcessBuffer;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
+use Ratchet\Server\IoServer;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\Process\ProcessBuilder;
 
 class AddonSocketListener implements MessageComponentInterface, ContainerAwareInterface
 {
@@ -28,6 +27,9 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
 
     /** @var  OutputInterface */
     protected $output;
+
+    /** @var  IoServer */
+    protected $server;
 
     /**
      * AddonSocketListener constructor.
@@ -85,18 +87,56 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
      */
     function onMessage(ConnectionInterface $from, $msg)
     {
+        $processBuilder = new ProcessBuilder();
+
+        $processBuilder
+            ->setTimeout(null)
+            ->add(PHP_BINARY)
+            ->add($this->container->get('kernel')->getRootDir() . '/console')
+            ->add('app:scan')
+            ->add('--ipc');
+
         $this->output->writeln($msg);
         $msg = json_decode($msg);
-        $input = new ArrayInput(['url' => $msg->url, 'referer' => $msg->referer, 'no-lock']);
-        $scanCommand = new ScanCommand();
-        $scanCommand->setContainer($this->container);
-        $returnValue = $scanCommand
-            ->setNotificationCallback(
-                function (Notification $notification) use ($from) {
-                    $from->send(json_encode($notification));
+        if ($msg->url == 'watchlists') {
+            $processBuilder->add('--watchlists');
+        } else {
+            $processBuilder
+                ->add($msg->url)
+                ->add($msg->referer);
+        }
+
+        $buffer = new ProcessBuffer(
+            function ($line) use ($from) {
+                if (substr($line, 0, 12) == 'NOTIFICATION') {
+                    $from->send(substr($line, 13));
                 }
-            )
-            ->run($input, $this->output);
-        $this->output->writeln("Scanner returned $returnValue");
+                $this->getServer()->loop->tick();
+            }
+        );
+
+        $process = $processBuilder->getProcess();
+
+        $process->run($buffer->getProcessCallback());
+        $buffer->close();
+
+    }
+
+    /**
+     * @return IoServer
+     */
+    public function getServer()
+    {
+        return $this->server;
+    }
+
+    /**
+     * @param IoServer $server
+     * @return $this
+     */
+    public function setServer($server)
+    {
+        $this->server = $server;
+        return $this;
     }
 }

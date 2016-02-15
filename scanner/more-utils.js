@@ -42,4 +42,8 @@
     return casper.echo('NOTIFY ' + message);
   };
 
+  module.exports.alert = function(casper, message) {
+    return casper.echo('ALERT ' + message);
+  };
+
 }).call(this);

@@ -56,11 +56,17 @@ class Notification implements \JsonSerializable
     private $created = null;
 
     /**
+     * @var bool
+     */
+    private $autoOpen = false;
+
+    /**
      * Notification constructor.
      */
-    public function __construct()
+    public function __construct($autoOpen = false)
     {
         $this->created = new \DateTime();
+        $this->autoOpen = $autoOpen;
     }
 
     /**
@@ -94,12 +100,13 @@ class Notification implements \JsonSerializable
     function jsonSerialize()
     {
         return [
-            'type'    => $this->type,
-            'title'   => $this->title,
-            'text'    => $this->text,
-            'url'     => $this->url,
-            'referer' => $this->referer,
-            'id'      => $this->id,
+            'type'     => $this->type,
+            'title'    => $this->title,
+            'text'     => $this->text,
+            'url'      => $this->url,
+            'referer'  => $this->referer,
+            'id'       => $this->id,
+            'autoOpen' => $this->autoOpen,
         ];
     }
 

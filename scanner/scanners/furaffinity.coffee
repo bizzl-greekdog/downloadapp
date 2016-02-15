@@ -52,8 +52,11 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @then ->
       url = checkQueue.shift()
       if not url
-        if downloadQueue.length > 1
-          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
+        if downloadQueue.length > 10
+          moreUtilities.alert @, "Prescan done, #{downloadQueue.length} pages will be scanned"
+        else
+          if downloadQueue.length > 1
+            moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if url == 'furaffinity:watchlist'
         @open 'http://www.furaffinity.net/msg/submissions/'

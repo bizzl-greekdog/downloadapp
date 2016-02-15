@@ -62,8 +62,12 @@
         var path, ref;
         url = checkQueue.shift();
         if (!url) {
-          if (downloadQueue.length > 1) {
-            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+          if (downloadQueue.length > 10) {
+            moreUtilities.alert(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+          } else {
+            if (downloadQueue.length > 1) {
+              moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+            }
           }
           return this.goto('VIEW');
         } else if (url === 'furaffinity:watchlist') {

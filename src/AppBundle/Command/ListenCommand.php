@@ -39,6 +39,8 @@ class ListenCommand extends ContainerAwareCommand
         $addonSocketListener = new AddonSocketListener($output);
         $addonSocketListener->setContainer($this->getContainer());
         $server = IoServer::factory(new HttpServer(new WsServer($addonSocketListener)), $input->getOption('port'), $input->getOption('interface'));
+        $addonSocketListener->setServer($server);
+        $output->writeln(sprintf('Listening to %s:%s', $input->getOption('interface'), $input->getOption('port')));
         $server->run();
         return 0;
     }

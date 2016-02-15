@@ -35,3 +35,6 @@ module.exports.exportDownloads = (casper, a) ->
 
 module.exports.notify = (casper, message) ->
   casper.echo 'NOTIFY ' + message
+
+module.exports.alert = (casper, message) ->
+  casper.echo 'ALERT ' + message

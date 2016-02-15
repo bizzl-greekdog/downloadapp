@@ -1,7 +1,9 @@
 scanners:
   deviantart:
-    watchlist: 'deviantart:watchlist'
+    watchlist:
+        key: 'deviantart:watchlist'
   apod:
     watchlist: false
   furaffinity:
-    watchlist: 'furaffinity:watchlist'
+    watchlist:
+        key: 'furaffinity:watchlist'
