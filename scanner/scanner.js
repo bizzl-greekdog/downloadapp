@@ -42,7 +42,9 @@
     pageSettings: {
       loadImages: false,
       loadPlugins: false
-    }
+    },
+    verbose: true,
+    logLevel: 'debug'
   });
 
   utilities = require('utils');
@@ -108,7 +110,7 @@
         return download.metadata.Source = download.url;
       });
       return this.run(function() {
-        utilities.dump([download]);
+        moreUtilities.exportDownloads(this, [download]);
         return this.exit(0);
       });
     });

@@ -34,8 +34,8 @@ casper = require(HERE + '/loopy-casper').create {
   pageSettings:
     loadImages: false
     loadPlugins: false
-  #verbose: true
-  #logLevel: 'debug'
+  verbose: true
+  logLevel: 'debug'
 }
 utilities = require 'utils'
 moreUtilities = require HERE + '/more-utils'
@@ -82,5 +82,6 @@ if not identified
       download.filename = download.url.split('/').pop()
       download.metadata.Source = download.url
     @run ->
-      utilities.dump [download]
+      #utilities.dump [download]
+      moreUtilities.exportDownloads @, [download]
       @exit 0

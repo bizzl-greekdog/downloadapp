@@ -36,13 +36,17 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
   #checkQueue = (arg for arg in args when arg.substr(0, 4) == 'http' or arg in magicUrls)
   checkQueue = [url]
   downloadQueue = []
-  downloadItems = []
 
   patternUrl = null
   scraps = false
 
   casper.do ->
     @start 'http://www.deviantart.com/notifications/'
+    @then ->
+      # "Ad Blocker"
+      @page.onResourceRequested = (requestData, request) ->
+        if -1 == requestData['url'].indexOf 'deviantart.com/'
+          request.abort()
     @thenBypassIf (-> 'users/login' in @page.url), 1
     @then ->
       @fill 'form#login', {
@@ -54,6 +58,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
       url = checkQueue.shift()
       patternUrl = null
       if not url
+        if downloadQueue.length > 1
+          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if url == 'deviantart:watchlist'
         patternUrl = new moreUtilities.PatternUrl 'http://my.deviantart.com/global/difi/?c[]="MessageCenter","get_views",[284144,"oq:devwatch:%i:24:b:tg=deviations"]&t=json', 0, 24
@@ -139,7 +145,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           catch e
             comment = ''
 
-          downloadItem =
+          @downloadItem =
             url: null
             filename: null
             referer: url
@@ -158,17 +164,17 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
             originalFilename = fileUrl.split('/').pop()
 
             fileName = 'deviantart_' + originalFilename
-            artistRegex = new RegExp '_by_' + downloadItem.metadata.Artist.replace(/[-_ ]/g, '[-_]') + '\.' + fileName.split('.').pop() + '$', 'i'
+            artistRegex = new RegExp '_by_' + @downloadItem.metadata.Artist.replace(/[-_ ]/g, '[-_]') + '\.' + fileName.split('.').pop() + '$', 'i'
             if not fileName.match artistRegex
-              fileName = fileName.replace new RegExp('\.' + fileName.split('.').pop() + '$', 'i'), '_by_' + downloadItem.metadata.Artist + '.' + fileName.split('.').pop()
+              fileName = fileName.replace new RegExp('\.' + fileName.split('.').pop() + '$', 'i'), '_by_' + @downloadItem.metadata.Artist + '.' + fileName.split('.').pop()
 
-            downloadItem.url = fileUrl
-            downloadItem.filename = fileName
-            downloadItem.metadata['Original Filename'] = originalFilename
+            @downloadItem.url = fileUrl
+            @downloadItem.filename = fileName
+            @downloadItem.metadata['Original Filename'] = originalFilename
 
-            downloadItems.push downloadItem
+            moreUtilities.exportDownloads @, [@downloadItem]
+
             @goto 'VIEW'
     @label 'END'
     @run ->
-      utilities.dump downloadItems
       @exit 0

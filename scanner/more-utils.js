@@ -32,4 +32,14 @@
     return system.stdin.readLine();
   };
 
+  module.exports.exportDownloads = function(casper, a) {
+    return a.forEach(function(element) {
+      return casper.echo('DOWNLOAD ' + JSON.stringify(element));
+    });
+  };
+
+  module.exports.notify = function(casper, message) {
+    return casper.echo('NOTIFY ' + message);
+  };
+
 }).call(this);

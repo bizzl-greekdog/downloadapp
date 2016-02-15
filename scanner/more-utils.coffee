@@ -28,3 +28,10 @@ class module.exports.PatternUrl
 module.exports.scanLine = ->
   system = require 'system'
   system.stdin.readLine()
+
+module.exports.exportDownloads = (casper, a) ->
+  a.forEach (element) ->
+    casper.echo 'DOWNLOAD ' + JSON.stringify(element)
+
+module.exports.notify = (casper, message) ->
+  casper.echo 'NOTIFY ' + message

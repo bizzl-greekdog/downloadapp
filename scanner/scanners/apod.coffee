@@ -42,6 +42,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @then ->
       url = checkQueue.shift()
       if not url
+        if downloadQueue.length > 1
+          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if -1 < url.indexOf 'apod/astropix'
         @open url
@@ -73,7 +75,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
             .trim()
             .replace ///\ *\n///g, ' '
             .replace ///\ \ ///g, "\n"
-          downloadItems.push
+
+          downloadItem =
             url: fileUrl,
             filename: 'apod_' + origFn,
             referer: referer,
@@ -83,8 +86,9 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
               'Original filename': origFn,
               'Source': referer
             comment: comment
+          moreUtilities.exportDownloads @, [downloadItem]
+
           @goto 'VIEW'
     @label 'END'
     @run ->
-      utilities.dump downloadItems
       @exit 0

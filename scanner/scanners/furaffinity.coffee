@@ -24,7 +24,7 @@
 ###
 
 module.exports.identify = (url, referer) ->
-  if -1 < url.indexOf 'www.furaffinity.net/'
+  if url == 'furaffinity:watchlist' or -1 < url.indexOf 'www.furaffinity.net/'
     url
   else if -1 < referer.indexOf 'www.furaffinity.net/'
     referer
@@ -34,7 +34,6 @@ module.exports.identify = (url, referer) ->
 module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
   checkQueue = [url]
   downloadQueue = []
-  downloadItems = []
 
   casper.do ->
     @start 'http://www.furaffinity.net/msg/others'
@@ -53,6 +52,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @then ->
       url = checkQueue.shift()
       if not url
+        if downloadQueue.length > 1
+          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if url == 'furaffinity:watchlist'
         @open 'http://www.furaffinity.net/msg/submissions/'
@@ -80,6 +81,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
       images = @getElementsAttribute('#messages-form .t-image a', 'href').filter (e, i, a) -> String(e).substr(0, 6) == '/view/'
       processed = 0
       images.forEach (image) ->
+        image = 'http://furaffinity.net' + image
         if -1 == downloadQueue.indexOf image
           downloadQueue.push image
           processed++
@@ -127,6 +129,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @label 'VIEW'
     @then ->
       url = downloadQueue.shift()
+      @echo url
       if not url
         @goto 'END'
       else
@@ -138,20 +141,20 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           artist = @fetchText '#page-submission td.cat a[href*=user]'
           fileName = fileUrl.split('/').pop()
           comment = moreUtilities.cleanText @getHTML('#page-submission td.alt1[width="70%"]')
-          downloadItems.push {
+
+          downloadItem =
             url: fileUrl,
             filename: fileName,
             referer: url,
             comment: comment,
-            metadata: {
+            metadata:
               'Artist': artist,
               'Title': title,
               'Source': url,
               'Original Filename': fileUrl.split('/').pop()
-            }
-          }
+          moreUtilities.exportDownloads @, [downloadItem]
+
           @goto 'VIEW'
     @label 'END'
     @run ->
-      utilities.dump downloadItems
       @exit 0

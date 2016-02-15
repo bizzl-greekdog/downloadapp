@@ -39,14 +39,20 @@
   };
 
   module.exports.run = function(casper, utilities, moreUtilities, parameters, url) {
-    var checkQueue, downloadItems, downloadQueue, patternUrl, scraps;
+    var checkQueue, downloadQueue, patternUrl, scraps;
     checkQueue = [url];
     downloadQueue = [];
-    downloadItems = [];
     patternUrl = null;
     scraps = false;
     return casper["do"](function() {
       this.start('http://www.deviantart.com/notifications/');
+      this.then(function() {
+        return this.page.onResourceRequested = function(requestData, request) {
+          if (-1 === requestData['url'].indexOf('deviantart.com/')) {
+            return request.abort();
+          }
+        };
+      });
       this.thenBypassIf((function() {
         return indexOf.call(this.page.url, 'users/login') >= 0;
       }), 1);
@@ -62,6 +68,9 @@
         url = checkQueue.shift();
         patternUrl = null;
         if (!url) {
+          if (downloadQueue.length > 1) {
+            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+          }
           return this.goto('VIEW');
         } else if (url === 'deviantart:watchlist') {
           patternUrl = new moreUtilities.PatternUrl('http://my.deviantart.com/global/difi/?c[]="MessageCenter","get_views",[284144,"oq:devwatch:%i:24:b:tg=deviations"]&t=json', 0, 24);
@@ -138,7 +147,7 @@
         } else {
           this.open(url);
           return this.then(function() {
-            var artist, comment, downloadItem, e, error, fileUrl, title;
+            var artist, comment, e, error, fileUrl, title;
             url = this.getCurrentUrl();
             fileUrl = this.getElementAttribute('.dev-page-download', 'href');
             if (fileUrl === null) {
@@ -179,7 +188,7 @@
               e = error;
               comment = '';
             }
-            downloadItem = {
+            this.downloadItem = {
               url: null,
               filename: null,
               referer: url,
@@ -202,14 +211,14 @@
               fileUrl = this.getCurrentUrl();
               originalFilename = fileUrl.split('/').pop();
               fileName = 'deviantart_' + originalFilename;
-              artistRegex = new RegExp('_by_' + downloadItem.metadata.Artist.replace(/[-_ ]/g, '[-_]') + '\.' + fileName.split('.').pop() + '$', 'i');
+              artistRegex = new RegExp('_by_' + this.downloadItem.metadata.Artist.replace(/[-_ ]/g, '[-_]') + '\.' + fileName.split('.').pop() + '$', 'i');
               if (!fileName.match(artistRegex)) {
-                fileName = fileName.replace(new RegExp('\.' + fileName.split('.').pop() + '$', 'i'), '_by_' + downloadItem.metadata.Artist + '.' + fileName.split('.').pop());
+                fileName = fileName.replace(new RegExp('\.' + fileName.split('.').pop() + '$', 'i'), '_by_' + this.downloadItem.metadata.Artist + '.' + fileName.split('.').pop());
               }
-              downloadItem.url = fileUrl;
-              downloadItem.filename = fileName;
-              downloadItem.metadata['Original Filename'] = originalFilename;
-              downloadItems.push(downloadItem);
+              this.downloadItem.url = fileUrl;
+              this.downloadItem.filename = fileName;
+              this.downloadItem.metadata['Original Filename'] = originalFilename;
+              moreUtilities.exportDownloads(this, [this.downloadItem]);
               return this.goto('VIEW');
             });
           });
@@ -217,7 +226,6 @@
       });
       this.label('END');
       return this.run(function() {
-        utilities.dump(downloadItems);
         return this.exit(0);
       });
     });

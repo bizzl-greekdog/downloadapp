@@ -27,7 +27,7 @@
 
 (function() {
   module.exports.identify = function(url, referer) {
-    if (-1 < url.indexOf('www.furaffinity.net/')) {
+    if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/')) {
       return url;
     } else if (-1 < referer.indexOf('www.furaffinity.net/')) {
       return referer;
@@ -37,10 +37,9 @@
   };
 
   module.exports.run = function(casper, utilities, moreUtilities, parameters, url) {
-    var checkQueue, downloadItems, downloadQueue;
+    var checkQueue, downloadQueue;
     checkQueue = [url];
     downloadQueue = [];
-    downloadItems = [];
     return casper["do"](function() {
       this.start('http://www.furaffinity.net/msg/others');
       this.thenBypassIf((function() {
@@ -63,6 +62,9 @@
         var path, ref;
         url = checkQueue.shift();
         if (!url) {
+          if (downloadQueue.length > 1) {
+            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+          }
           return this.goto('VIEW');
         } else if (url === 'furaffinity:watchlist') {
           this.open('http://www.furaffinity.net/msg/submissions/');
@@ -97,6 +99,7 @@
         });
         processed = 0;
         images.forEach(function(image) {
+          image = 'http://furaffinity.net' + image;
           if (-1 === downloadQueue.indexOf(image)) {
             downloadQueue.push(image);
             return processed++;
@@ -159,19 +162,20 @@
       this.label('VIEW');
       this.then(function() {
         url = downloadQueue.shift();
+        this.echo(url);
         if (!url) {
           return this.goto('END');
         } else {
           this.open(url);
           return this.then(function() {
-            var artist, comment, fileName, fileUrl, title;
+            var artist, comment, downloadItem, fileName, fileUrl, title;
             url = this.page.url;
             fileUrl = 'http:' + this.getElementAttribute('a[href*=facdn]', 'href');
             title = this.getHTML('#page-submission td.cat b');
             artist = this.fetchText('#page-submission td.cat a[href*=user]');
             fileName = fileUrl.split('/').pop();
             comment = moreUtilities.cleanText(this.getHTML('#page-submission td.alt1[width="70%"]'));
-            downloadItems.push({
+            downloadItem = {
               url: fileUrl,
               filename: fileName,
               referer: url,
@@ -182,14 +186,14 @@
                 'Source': url,
                 'Original Filename': fileUrl.split('/').pop()
               }
-            });
+            };
+            moreUtilities.exportDownloads(this, [downloadItem]);
             return this.goto('VIEW');
           });
         }
       });
       this.label('END');
       return this.run(function() {
-        utilities.dump(downloadItems);
         return this.exit(0);
       });
     });

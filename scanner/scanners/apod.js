@@ -47,6 +47,9 @@
       this.then(function() {
         url = checkQueue.shift();
         if (!url) {
+          if (downloadQueue.length > 1) {
+            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
+          }
           return this.goto('VIEW');
         } else if (-1 < url.indexOf('apod/astropix')) {
           this.open(url);
@@ -70,7 +73,7 @@
         } else {
           this.open(url);
           return this.then(function() {
-            var artist, comment, fileUrl, origFn, referer, title;
+            var artist, comment, downloadItem, fileUrl, origFn, referer, title;
             referer = this.getCurrentUrl();
             fileUrl = this.getElementAttribute(this.x('/html/body/center[1]/p[2]/a'), 'href');
             fileUrl = "http://apod.nasa.gov/apod/" + fileUrl;
@@ -78,7 +81,7 @@
             title = this.fetchText(this.x('/html/body/center[2]/b[1]')).trim();
             artist = this.fetchText(this.x('/html/body/center[2]')).replace(/\n/g, ' ').replace(/\s+/g, ' ').split(':', 2)[1].trim();
             comment = moreUtilities.cleanText(this.fetchText(this.x('/html/body/p[1]'))).replace(/^Explanation: /, '').trim().replace(/ *\n/g, ' ').replace(/  /g, "\n");
-            downloadItems.push({
+            downloadItem = {
               url: fileUrl,
               filename: 'apod_' + origFn,
               referer: referer,
@@ -89,14 +92,14 @@
                 'Source': referer
               },
               comment: comment
-            });
+            };
+            moreUtilities.exportDownloads(this, [downloadItem]);
             return this.goto('VIEW');
           });
         }
       });
       this.label('END');
       return this.run(function() {
-        utilities.dump(downloadItems);
         return this.exit(0);
       });
     });
