@@ -28,8 +28,13 @@ body {
   flex-direction: column;
   min-height: 100vh;
   a {
-    text-decoration: none;
     color: inherit;
+    &.fa {
+      text-decoration: none;
+      &:before, &:after {
+        text-decoration: none;
+      }
+    }
   }
   header {
     background-color: darken($background-color, 10%);
@@ -53,9 +58,6 @@ body {
       code {
         font-size: 1rem;
         font-family: monospace;
-        a {
-          text-decoration: underline;
-        }
       }
       &:before {
         width: 5rem;

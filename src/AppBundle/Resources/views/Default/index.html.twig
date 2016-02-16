@@ -9,7 +9,7 @@
                     <td class="icon"><span class="fa {{ download.mimetype|faFileIcon }}"></span></td>
                     <td>
                         <p>{{ download.filename }}</p>
-                        <small>From {{ download.referer }}</small>
+                        <small>From <a href="{{ download.referer }}">{{ download.referer }}</a></small>
                     </td>
                     <td class="action">
                         <a href="{{ path('app_download', {id: download.id}) }}" class="fa fa-play"></a>

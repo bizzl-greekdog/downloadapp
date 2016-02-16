@@ -73,8 +73,8 @@ class ScanCommand extends ContainerAwareCommand
                 if (!isset($scanner['watchlist']) || !$scanner['watchlist']) {
                     continue;
                 }
-                $scanned = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['key'], $output);
-                $this->saveScan($scanned, '', '', true);
+                $scanned = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['url'], $output);
+                $this->saveScan($scanned, $scanner['watchlist']['url'], '', true);
             }
         } elseif ($url) {
             $referer = $input->getArgument('referer');
@@ -262,7 +262,7 @@ class ScanCommand extends ContainerAwareCommand
         $notification
             ->setType('info')
             ->setTitle('Scan successful')
-            ->setText("{$results['saved']} saved, {$results['skipped']} skipped, {$results['queued']} queued")
+            ->setText("{$results['saved']} saved, {$results['skipped']} skipped, {$results['queued']} enqueued")
             ->setUrl($url)
             ->setReferer($referer);
         $this->sendNotification($notification);
