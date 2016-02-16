@@ -33,6 +33,10 @@ module.exports.exportDownloads = (casper, a) ->
   a.forEach (element) ->
     casper.echo 'DOWNLOAD ' + JSON.stringify(element)
 
+module.exports.enqueueUrls = (casper, urls) ->
+  urls.forEach (url) ->
+    casper.echo 'ENQUEUE ' + url
+
 module.exports.notify = (casper, message) ->
   casper.echo 'NOTIFY ' + message
 

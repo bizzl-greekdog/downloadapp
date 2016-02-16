@@ -52,11 +52,14 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @then ->
       url = checkQueue.shift()
       if not url
-        if downloadQueue.length > 10
+        if downloadQueue.length > 1000
+          moreUtilities.alert @, "Prescan done, #{downloadQueue.length} pages will be enqueued"
+          @goto 'ENQUEUE'
+          return
+        else if downloadQueue.length > 10
           moreUtilities.alert @, "Prescan done, #{downloadQueue.length} pages will be scanned"
-        else
-          if downloadQueue.length > 1
-            moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
+        else if downloadQueue.length > 1
+          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if url == 'furaffinity:watchlist'
         @open 'http://www.furaffinity.net/msg/submissions/'
@@ -132,7 +135,6 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
     @label 'VIEW'
     @then ->
       url = downloadQueue.shift()
-      @echo url
       if not url
         @goto 'END'
       else
@@ -158,6 +160,10 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
           moreUtilities.exportDownloads @, [downloadItem]
 
           @goto 'VIEW'
+    @label 'ENQUEUE'
+    @then ->
+      moreUtilities.enqueueUrls @, downloadQueue
+      @goto 'END'
     @label 'END'
     @run ->
       @exit 0

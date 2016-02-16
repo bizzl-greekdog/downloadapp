@@ -68,12 +68,14 @@
         url = checkQueue.shift();
         patternUrl = null;
         if (!url) {
-          if (downloadQueue.length > 10) {
+          if (downloadQueue.length > 1000) {
+            moreUtilities.alert(this, "Prescan done, " + downloadQueue.length + " pages will be enqueued");
+            this.goto('ENQUEUE');
+            return;
+          } else if (downloadQueue.length > 10) {
             moreUtilities.alert(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
-          } else {
-            if (downloadQueue.length > 1) {
-              moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
-            }
+          } else if (downloadQueue.length > 1) {
+            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
           }
           return this.goto('VIEW');
         } else if (url === 'deviantart:watchlist') {
@@ -227,6 +229,11 @@
             });
           });
         }
+      });
+      this.label('ENQUEUE');
+      this.then(function() {
+        moreUtilities.enqueueUrls(this, downloadQueue);
+        return this.goto('END');
       });
       this.label('END');
       return this.run(function() {

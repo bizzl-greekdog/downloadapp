@@ -62,12 +62,14 @@
         var path, ref;
         url = checkQueue.shift();
         if (!url) {
-          if (downloadQueue.length > 10) {
+          if (downloadQueue.length > 1000) {
+            moreUtilities.alert(this, "Prescan done, " + downloadQueue.length + " pages will be enqueued");
+            this.goto('ENQUEUE');
+            return;
+          } else if (downloadQueue.length > 10) {
             moreUtilities.alert(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
-          } else {
-            if (downloadQueue.length > 1) {
-              moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
-            }
+          } else if (downloadQueue.length > 1) {
+            moreUtilities.notify(this, "Prescan done, " + downloadQueue.length + " pages will be scanned");
           }
           return this.goto('VIEW');
         } else if (url === 'furaffinity:watchlist') {
@@ -166,7 +168,6 @@
       this.label('VIEW');
       this.then(function() {
         url = downloadQueue.shift();
-        this.echo(url);
         if (!url) {
           return this.goto('END');
         } else {
@@ -195,6 +196,11 @@
             return this.goto('VIEW');
           });
         }
+      });
+      this.label('ENQUEUE');
+      this.then(function() {
+        moreUtilities.enqueueUrls(this, downloadQueue);
+        return this.goto('END');
       });
       this.label('END');
       return this.run(function() {

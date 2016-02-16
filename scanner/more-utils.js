@@ -38,6 +38,12 @@
     });
   };
 
+  module.exports.enqueueUrls = function(casper, urls) {
+    return urls.forEach(function(url) {
+      return casper.echo('ENQUEUE ' + url);
+    });
+  };
+
   module.exports.notify = function(casper, message) {
     return casper.echo('NOTIFY ' + message);
   };

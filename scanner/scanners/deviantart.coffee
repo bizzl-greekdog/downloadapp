@@ -58,11 +58,14 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
       url = checkQueue.shift()
       patternUrl = null
       if not url
-        if downloadQueue.length > 10
+        if downloadQueue.length > 1000
+          moreUtilities.alert @, "Prescan done, #{downloadQueue.length} pages will be enqueued"
+          @goto 'ENQUEUE'
+          return
+        else if downloadQueue.length > 10
           moreUtilities.alert @, "Prescan done, #{downloadQueue.length} pages will be scanned"
-        else
-          if downloadQueue.length > 1
-            moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
+        else if downloadQueue.length > 1
+          moreUtilities.notify @, "Prescan done, #{downloadQueue.length} pages will be scanned"
         @goto 'VIEW'
       else if url == 'deviantart:watchlist'
         patternUrl = new moreUtilities.PatternUrl 'http://my.deviantart.com/global/difi/?c[]="MessageCenter","get_views",[284144,"oq:devwatch:%i:24:b:tg=deviations"]&t=json', 0, 24
@@ -178,6 +181,10 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
             moreUtilities.exportDownloads @, [@downloadItem]
 
             @goto 'VIEW'
+    @label 'ENQUEUE'
+    @then ->
+      moreUtilities.enqueueUrls @, downloadQueue
+      @goto 'END'
     @label 'END'
     @run ->
       @exit 0

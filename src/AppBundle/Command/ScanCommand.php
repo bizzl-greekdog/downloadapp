@@ -5,6 +5,7 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Download;
 use AppBundle\Entity\Notification;
+use AppBundle\Entity\QueuedUrl;
 use AppBundle\Utilities\ProcessBuffer;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,6 +34,33 @@ class ScanCommand extends ContainerAwareCommand
             ->addArgument('referer', null, 'referer to include in scan', false);
     }
 
+    private function saveScan($scanned, $url, $referer, $autoOpen = false)
+    {
+        if ($scanned['total']) {
+            $results = $this->saveDownloads($scanned['downloads']);
+            $results['queued'] = $this->enqueueUrls($scanned['queued']);
+            $this->successNotification($results, $url, $referer, $autoOpen);
+        } else {
+            $this->failureNotification($url, $referer, $autoOpen);
+        }
+    }
+
+    private function enqueueUrls(array $urls)
+    {
+        $em = $this->getContainer()->get('doctrine.orm.entity_manager');
+        $result = 0;
+        foreach ($urls as $url) {
+            $queuedUrl = new QueuedUrl();
+            $queuedUrl
+                ->setUrl($url)
+                ->setReferer($url)
+                ->setPriority(999);
+            $em->persist($queuedUrl);
+            $result++;
+        }
+        return $result;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
@@ -45,26 +73,16 @@ class ScanCommand extends ContainerAwareCommand
                 if (!isset($scanner['watchlist']) || !$scanner['watchlist']) {
                     continue;
                 }
-                $downloads = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['key'], $output);
-                if ($downloads) {
-                    $results = $this->saveDownloads($downloads);
-                    $this->successNotification($results, '', '', true);
-                } else {
-                    $this->failureNotification('', '', true);
-                }
+                $scanned = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['key'], $output);
+                $this->saveScan($scanned, '', '', true);
             }
         } elseif ($url) {
             $referer = $input->getArgument('referer');
             if (!$referer) {
                 $referer = $url;
             }
-            $downloads = $this->scan($url, $referer, $output);
-            if ($downloads) {
-                $results = $this->saveDownloads($downloads);
-                $this->successNotification($results, $url, $referer);
-            } else {
-                $this->failureNotification($url, $referer);
-            }
+            $scanned = $this->scan($url, $referer, $output);
+            $this->saveScan($scanned, $url, $referer, false);
         } else {
             $count = $input->getOption('count');
             $repo = $em->getRepository('AppBundle:QueuedUrl');
@@ -80,13 +98,8 @@ class ScanCommand extends ContainerAwareCommand
                 $queuedUrl = $repo->find($id['id']);
                 $url = $queuedUrl->getUrl();
                 $referer = $queuedUrl->getReferer();
-                $downloads = $this->scan($url, $referer);
-                if ($downloads) {
-                    $results = $this->saveDownloads($downloads);
-                    $this->successNotification($results, $url, $referer);
-                } else {
-                    $this->failureNotification($url, $referer);
-                }
+                $scanned = $this->scan($url, $referer);
+                $this->saveScan($scanned, $url, $referer, false);
                 $em->remove($queuedUrl);
             }
         }
@@ -130,10 +143,13 @@ class ScanCommand extends ContainerAwareCommand
         $logger->debug($process->getCommandLine());
 
         $downloads = [];
+        $queued = [];
 
         $buffer = new ProcessBuffer(
-            function ($line) use (&$downloads, $logger, $url, $referer) {
-                if (substr($line, 0, 8) == 'DOWNLOAD') {
+            function ($line) use (&$downloads, &$queued, $logger, $url, $referer) {
+                if (substr($line, 0, 7) == 'ENQUEUE') {
+                    $queued[] = substr($line, 8);
+                } elseif (substr($line, 0, 8) == 'DOWNLOAD') {
                     $download = json_decode(substr($line, 9), JSON_OBJECT_AS_ARRAY);
                     if (json_last_error() !== JSON_ERROR_NONE) {
                         $logger->error(json_last_error_msg());
@@ -182,7 +198,7 @@ class ScanCommand extends ContainerAwareCommand
             }
         }
 
-        return $downloads;
+        return ['downloads' => $downloads, 'queued' => $queued, 'total' => count($queued) + count($downloads)];
     }
 
     private function getPath($varname, $default)
@@ -246,7 +262,7 @@ class ScanCommand extends ContainerAwareCommand
         $notification
             ->setType('info')
             ->setTitle('Scan successful')
-            ->setText("{$results['saved']} saved, {$results['skipped']} skipped")
+            ->setText("{$results['saved']} saved, {$results['skipped']} skipped, {$results['queued']} queued")
             ->setUrl($url)
             ->setReferer($referer);
         $this->sendNotification($notification);
