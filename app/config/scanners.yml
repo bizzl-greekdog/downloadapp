@@ -20,3 +20,5 @@ scanners:
         watchlist: false
     tumblr:
         watchlist: false
+    derpibooru:
+        watchlist: false
