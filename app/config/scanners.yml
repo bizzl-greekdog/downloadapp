@@ -1,11 +1,22 @@
 scanners:
-  deviantart:
-    watchlist:
-        key: deviantart:watchlist
-        url: http://www.deviantart.com/notifications/#view=deviations
-  apod:
-    watchlist: false
-  furaffinity:
-    watchlist:
-        key: furaffinity:watchlist
-        url: http://www.furaffinity.net/msg/submissions/
+    deviantart:
+        watchlist:
+            key: deviantart:watchlist
+            url: http://www.deviantart.com/notifications/#view=deviations
+    apod:
+        watchlist: false
+    furaffinity:
+        watchlist:
+            key: furaffinity:watchlist
+            url: http://www.furaffinity.net/msg/submissions/
+    blogspot:
+        watchlist: false
+        domains:
+            - www.equestriadaily.com
+            - equestriadaily.com
+    livejournal:
+        watchlist: false
+    wordpress:
+        watchlist: false
+    tumblr:
+        watchlist: false

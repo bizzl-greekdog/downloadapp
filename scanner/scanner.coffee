@@ -37,6 +37,7 @@ casper = require(HERE + '/loopy-casper').create {
   verbose: true
   logLevel: 'debug'
 }
+
 utilities = require 'utils'
 moreUtilities = require HERE + '/more-utils'
 YAML = require HERE + '/node_modules/yamljs/index'
@@ -60,19 +61,18 @@ for scanner, config of scanners
   scannerModule = require scannerFile
   if not scannerModule.identify
     continue
-  identified = scannerModule.identify url, referer
+  identified = scannerModule.identify url, referer, parameters[scanner], config
   if identified
-    scannerModule.run casper, utilities, moreUtilities, parameters[scanner], identified
+    scannerModule.run casper, utilities, moreUtilities, parameters[scanner], config, identified
     break
 
 if not identified
   casper.do ->
-    download = {
+    download =
       referer: referer
       comment: ''
       metadata:
         'Found at': referer
-    }
     @start url,
       method: 'head'
       headers:

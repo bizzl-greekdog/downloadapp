@@ -81,9 +81,9 @@
     if (!scannerModule.identify) {
       continue;
     }
-    identified = scannerModule.identify(url, referer);
+    identified = scannerModule.identify(url, referer, parameters[scanner], config);
     if (identified) {
-      scannerModule.run(casper, utilities, moreUtilities, parameters[scanner], identified);
+      scannerModule.run(casper, utilities, moreUtilities, parameters[scanner], config, identified);
       break;
     }
   }

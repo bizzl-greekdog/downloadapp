@@ -28,7 +28,7 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  module.exports.identify = function(url, referer) {
+  module.exports.identify = function(url, referer, parameters, config) {
     if (url === 'deviantart:watchlist' || -1 < url.indexOf('deviantart.com/')) {
       return url;
     } else if (-1 < referer.indexOf('deviantart.com/')) {
@@ -38,7 +38,7 @@
     }
   };
 
-  module.exports.run = function(casper, utilities, moreUtilities, parameters, url) {
+  module.exports.run = function(casper, utilities, moreUtilities, parameters, config, url) {
     var checkQueue, downloadQueue, patternUrl, scraps;
     checkQueue = [url];
     downloadQueue = [];

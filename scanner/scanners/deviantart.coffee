@@ -23,7 +23,7 @@
  * THE SOFTWARE.
 ###
 
-module.exports.identify = (url, referer) ->
+module.exports.identify = (url, referer, parameters, config) ->
   if url == 'deviantart:watchlist' or -1 < url.indexOf 'deviantart.com/'
     url
   else if -1 < referer.indexOf 'deviantart.com/'
@@ -31,7 +31,7 @@ module.exports.identify = (url, referer) ->
   else
     false
 
-module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
+module.exports.run = (casper, utilities, moreUtilities, parameters, config, url) ->
   #magicUrls = ['deviantart:watchlist']
   #checkQueue = (arg for arg in args when arg.substr(0, 4) == 'http' or arg in magicUrls)
   checkQueue = [url]

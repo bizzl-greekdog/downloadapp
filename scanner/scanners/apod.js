@@ -26,7 +26,7 @@
  */
 
 (function() {
-  module.exports.identify = function(url, referer) {
+  module.exports.identify = function(url, referer, parameters, config) {
     if (-1 < url.indexOf('apod.nasa.gov/')) {
       return url;
     } else if (-1 < referer.indexOf('apod.nasa.gov/')) {
@@ -36,7 +36,7 @@
     }
   };
 
-  module.exports.run = function(casper, utilities, moreUtilities, parameters, url) {
+  module.exports.run = function(casper, utilities, moreUtilities, parameters, config, url) {
     var checkQueue, downloadItems, downloadQueue;
     checkQueue = [url];
     downloadQueue = [];

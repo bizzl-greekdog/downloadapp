@@ -23,7 +23,7 @@
  * THE SOFTWARE.
 ###
 
-module.exports.identify = (url, referer) ->
+module.exports.identify = (url, referer, parameters, config) ->
   if url == 'furaffinity:watchlist' or -1 < url.indexOf 'www.furaffinity.net/'
     url
   else if -1 < referer.indexOf 'www.furaffinity.net/'
@@ -31,7 +31,7 @@ module.exports.identify = (url, referer) ->
   else
     false
 
-module.exports.run = (casper, utilities, moreUtilities, parameters, url) ->
+module.exports.run = (casper, utilities, moreUtilities, parameters, config, url) ->
   checkQueue = [url]
   downloadQueue = []
 

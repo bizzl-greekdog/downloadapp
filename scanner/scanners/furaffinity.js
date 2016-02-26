@@ -26,7 +26,7 @@
  */
 
 (function() {
-  module.exports.identify = function(url, referer) {
+  module.exports.identify = function(url, referer, parameters, config) {
     if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/')) {
       return url;
     } else if (-1 < referer.indexOf('www.furaffinity.net/')) {
@@ -36,7 +36,7 @@
     }
   };
 
-  module.exports.run = function(casper, utilities, moreUtilities, parameters, url) {
+  module.exports.run = function(casper, utilities, moreUtilities, parameters, config, url) {
     var checkQueue, downloadQueue;
     checkQueue = [url];
     downloadQueue = [];
