@@ -22,3 +22,5 @@ scanners:
         watchlist: false
     derpibooru:
         watchlist: false
+    steamcommunity:
+        watchlist: false

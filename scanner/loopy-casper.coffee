@@ -164,10 +164,17 @@ LoopyCasper.prototype.tryAnyOfThese = (things, default_) ->
   for thing in things
     selector = thing['selector']
     attribute = thing['key']
-    m = @getElementAttribute selector, attribute
-    if m
-      return m
-  return default_
+    if @exists selector
+      m = @getElementAttribute selector, attribute
+      if m
+        return m
+  default_
+
+LoopyCasper.prototype.safeGetHTML = (selector, default_ = '') ->
+  if @exists selector
+    @getHTML selector
+  else
+    default_
 
 LoopyCasper.prototype.x = (xPath) ->
   casperModule.selectXPath xPath

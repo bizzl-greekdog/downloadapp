@@ -196,12 +196,25 @@
       thing = things[j];
       selector = thing['selector'];
       attribute = thing['key'];
-      m = this.getElementAttribute(selector, attribute);
-      if (m) {
-        return m;
+      if (this.exists(selector)) {
+        m = this.getElementAttribute(selector, attribute);
+        if (m) {
+          return m;
+        }
       }
     }
     return default_;
+  };
+
+  LoopyCasper.prototype.safeGetHTML = function(selector, default_) {
+    if (default_ == null) {
+      default_ = '';
+    }
+    if (this.exists(selector)) {
+      return this.getHTML(selector);
+    } else {
+      return default_;
+    }
   };
 
   LoopyCasper.prototype.x = function(xPath) {
