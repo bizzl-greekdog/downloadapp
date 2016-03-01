@@ -106,7 +106,10 @@
       });
       this.then(function() {
         download.url = this.getCurrentUrl();
-        download.filename = download.url.split('/').pop();
+        if (download.url === 'about:blank') {
+          download.url = url;
+        }
+        download.filename = download.url.split('/').pop().replace(/\?.*$/, '');
         return download.metadata.Source = download.url;
       });
       return this.run(function() {

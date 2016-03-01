@@ -79,7 +79,9 @@ if not identified
         Referer: referer
     @then ->
       download.url = @getCurrentUrl()
-      download.filename = download.url.split('/').pop()
+      if download.url == 'about:blank'
+        download.url = url
+      download.filename = download.url.split('/').pop().replace /\?.*$/, ''
       download.metadata.Source = download.url
     @run ->
       #utilities.dump [download]
