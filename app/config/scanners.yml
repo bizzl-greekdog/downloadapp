@@ -24,3 +24,7 @@ scanners:
         watchlist: false
     steamcommunity:
         watchlist: false
+    weasyl:
+        watchlist:
+            key: weasyl:watchlist
+            url: https://www.weasyl.com/messages/submissions
