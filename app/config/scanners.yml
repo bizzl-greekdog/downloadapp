@@ -28,3 +28,5 @@ scanners:
         watchlist:
             key: weasyl:watchlist
             url: https://www.weasyl.com/messages/submissions
+    inkbunny:
+        watchlist: false
