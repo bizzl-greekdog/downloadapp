@@ -7,6 +7,10 @@
 {% block header %}
     <header>
         <a href="{{ path('app_list_downloads', {page: 1}) }}"><span class="fa fa-arrow-left"></span> Overview</a>
+        <div class="stats">
+            <span>Downloads: {{ stats['Not Downloaded'] }} / {{ stats['Total'] }}</span>
+            <span>Enqueued: {{ stats['Enqueued'] }}</span>
+        </div>
     </header>
 {% endblock %}
 

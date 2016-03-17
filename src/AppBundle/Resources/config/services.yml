@@ -1,6 +1,10 @@
 services:
-  app.twig.font_awesome_file_type_extension:
-    class: AppBundle\Twig\FontAwesomeFileTypeExtension
-    public: false
-    tags:
-      - { name: twig.extension }
+    app.twig.font_awesome_file_type_extension:
+        class: AppBundle\Twig\FontAwesomeFileTypeExtension
+        public: false
+        tags:
+          - { name: twig.extension }
+    app.stats:
+        class: AppBundle\Services\StatsService
+        calls:
+            - [setContainer, [ '@service_container' ]]

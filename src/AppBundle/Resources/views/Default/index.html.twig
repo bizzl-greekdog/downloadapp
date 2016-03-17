@@ -1,5 +1,14 @@
 {% extends '::base.html.twig' %}
 
+{% block header %}
+    <header>
+        <div class="stats">
+            <span>Downloads: {{ stats['Not Downloaded'] }} / {{ stats['Total'] }}</span>
+            <span>Enqueued: {{ stats['Enqueued'] }}</span>
+        </div>
+    </header>
+{% endblock %}
+
 {% block body %}
     <main>
         <table>

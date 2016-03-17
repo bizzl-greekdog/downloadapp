@@ -5,11 +5,14 @@
 @import "compass/reset";
 @import "compass/css3/border-radius";
 @import "compass/css3/transform";
+@import "compass/utilities/color/contrast";
 
-$background-color: #999;
-$rows-odd: #bbb;
-$rows-even: #eee;
-$border-radii: 10px;
+$color-background: #999;
+$color-block-background: #eee;
+$color-block-text: contrast-color($color-block-background);
+$color-rows-odd: #bbb;
+$color-rows-even: #eee;
+$border-radius: 10px;
 
 @mixin notification($icon, $color) {
   background-color: lighten($color, 20%);
@@ -23,7 +26,7 @@ $border-radii: 10px;
 
 body {
   padding: 0 25px;
-  background-color: $background-color;
+  background-color: $color-background;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -37,16 +40,27 @@ body {
     }
   }
   header {
-    background-color: darken($background-color, 10%);
+    background-color: $color-block-background;
+    color: $color-block-text;
     padding: 10px;
-    @include border-bottom-left-radius($border-radii);
-    @include border-bottom-right-radius($border-radii);
+    @include border-bottom-left-radius($border-radius);
+    @include border-bottom-right-radius($border-radius);
+    div.stats {
+      display: flex;
+      float: right;
+      span {
+        &:not(:last-child):after {
+          content: '|';
+          padding: 0.25rem;
+        }
+      }
+    }
   }
   main {
     margin: 25px 0;
     flex-grow: 2;
-    @include border-radius($border-radii);
-    background-color: darken($background-color, 10%);
+    @include border-radius($border-radius);
+    background-color: darken($color-background, 10%);
     overflow: hidden;
     &.notification {
       border-width: 4px;
@@ -80,15 +94,15 @@ body {
       width: 100%;
       tr {
         &.odd {
-          background-color: $rows-odd;
+          background-color: $color-rows-odd;
           &.downloaded {
-            background-color: mix($rows-odd, green, 70%);
+            background-color: mix($color-rows-odd, green, 70%);
           }
         }
         &.even {
-          background-color: $rows-even;
+          background-color: $color-rows-even;
           &.downloaded {
-            background-color: mix($rows-even, green, 70%);
+            background-color: mix($color-rows-even, green, 70%);
           }
         }
         td {
@@ -103,9 +117,10 @@ body {
     }
   }
   footer {
-    background-color: darken($background-color, 10%);
+    background-color: $color-block-background;
+    color: $color-block-text;
     padding: 10px;
-    @include border-top-left-radius($border-radii);
-    @include border-top-right-radius($border-radii);
+    @include border-top-left-radius($border-radius);
+    @include border-top-right-radius($border-radius);
   }
 }

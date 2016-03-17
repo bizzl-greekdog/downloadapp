@@ -63,6 +63,7 @@ class DefaultController extends Controller
                 'total'          => $total,
                 'pageCount'      => $pageCount,
                 'showDownloaded' => $showDownloaded,
+                'stats'          => $this->container->get('app.stats')->getStats(),
             ]
         );
     }
@@ -83,6 +84,12 @@ class DefaultController extends Controller
             ->get('doctrine.orm.entity_manager')
             ->getRepository('AppBundle:Notification')
             ->find($id);
-        return $this->render('AppBundle:Default:notification.html.twig', ['notification' => $notification]);
+        return $this->render(
+            'AppBundle:Default:notification.html.twig',
+            [
+                'notification' => $notification,
+                'stats'        => $this->container->get('app.stats')->getStats(),
+            ]
+        );
     }
 }
