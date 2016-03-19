@@ -32,3 +32,11 @@ parameters:
       furaffinity:
         user: ~
         password: ~
+      weasyl:
+        user: ~
+        password: ~
+      inkbunny:
+        user: ~
+        password: ~
+      wordpress:
+        domains: []
