@@ -28,6 +28,11 @@ class DownloadCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $repo = $em->getRepository('AppBundle:Download');
         $download = $repo->find($downloadId);
+        $protocol = strtolower(explode(':', $download->getUrl())[0]);
+        if (!in_array($protocol, ['http', 'https'])) {
+            $output->writeln("<error>Invalid protocol $protocol</error>");
+            return;
+        }
         $saveFilename = $this->makeFilenameSave($download->getFilename());
         $filePath = $directory . DIRECTORY_SEPARATOR . $saveFilename;
         $output->write('Downloading ' . $download->getFilename());
