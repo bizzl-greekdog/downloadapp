@@ -14,7 +14,7 @@
         <table>
             {# @var download \AppBundle\Entity\Download #}
             {% for download in downloads %}
-                <tr class="{{ cycle(['odd', 'even'], loop.index) }}{% if download.downloaded %} downloaded{% endif %}">
+                <tr class="{{ cycle(['odd', 'even'], loop.index) }}{% if download.downloaded %} downloaded{% endif %}{% if download.failed %} failed{% endif %}">
                     <td class="icon"><span class="fa {{ download.mimetype|faFileIcon }}"></span></td>
                     <td>
                         <p>{{ download.filename }}</p>

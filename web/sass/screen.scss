@@ -98,11 +98,17 @@ body {
           &.downloaded {
             background-color: mix($color-rows-odd, green, 70%);
           }
+          &.failed {
+            background-color: mix($color-rows-odd, red, 70%);
+          }
         }
         &.even {
           background-color: $color-rows-even;
           &.downloaded {
             background-color: mix($color-rows-even, green, 70%);
+          }
+          &.failed {
+            background-color: mix($color-rows-even, red, 70%);
           }
         }
         td {

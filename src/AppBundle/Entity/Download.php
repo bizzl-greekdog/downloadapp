@@ -65,11 +65,18 @@ class Download
      * @ORM\Column(type="string", length=32, nullable=true)
      */
     private $checksum = null;
+
     /**
      * @var Metadatum[]
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Metadatum", mappedBy="download", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private $metadata;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = 0})
+     */
+    private $failed = false;
 
     /**
      * Download constructor.
@@ -243,13 +250,37 @@ class Download
         return $this;
     }
 
+    /**
+     * @return int|string
+     */
     public function getMimetype()
     {
         return Mime::getTypeForExtension($this->getExtension());
     }
 
+    /**
+     * @return string
+     */
     public function getExtension()
     {
         return pathinfo($this->getFilename(), PATHINFO_EXTENSION);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isFailed()
+    {
+        return $this->failed;
+    }
+
+    /**
+     * @param boolean $failed
+     * @return Download
+     */
+    public function setFailed($failed)
+    {
+        $this->failed = $failed;
+        return $this;
     }
 }

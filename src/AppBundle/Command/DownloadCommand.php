@@ -30,19 +30,25 @@ class DownloadCommand extends ContainerAwareCommand
         $download = $repo->find($downloadId);
         $protocol = strtolower(explode(':', $download->getUrl())[0]);
         if (!in_array($protocol, ['http', 'https'])) {
-            $output->writeln("<error>Invalid protocol \"$protocol\"</error>");
+            $this->getContainer()->get('logger')->addError("Invalid protocol \"$protocol\"");
+            $download->setFailed(true);
+            $em->persist($download);
             return;
         }
         if (!$download->getFilename()) {
-            $output->writeln("<error>Empty filename</error>");
+            $this->getContainer()->get('logger')->addError('Empty filename');
+            $download->setFailed(true);
+            $em->persist($download);
             return;
         }
         $saveFilename = $this->makeFilenameSave($download->getFilename());
         $filePath = $directory . DIRECTORY_SEPARATOR . $saveFilename;
-        $output->write('Downloading ' . $download->getFilename());
+        $msg = 'Downloading ' . $download->getFilename();
         if ($saveFilename != $download->getFilename()) {
-            $output->write(" as $saveFilename");
+            $msg .= " as $saveFilename";
         }
+        $this->getContainer()->get('logger')->addInfo($msg);
+        $output->write($msg);
         $this->downloadUrl($download->getUrl(), $filePath, $download->getReferer());
         file_put_contents($filePath . '.txt', $download);
         $output->writeln("   <info>Done</info>");
@@ -83,6 +89,7 @@ class DownloadCommand extends ContainerAwareCommand
             ->createQueryBuilder('d')
             ->select('d.id')
             ->where('d.downloaded = false')
+            ->andWhere('d.failed = false')
             ->orderBy('d.created')
             ->setMaxResults($number)
             ->getQuery()
