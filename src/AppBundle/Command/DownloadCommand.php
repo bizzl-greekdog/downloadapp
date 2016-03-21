@@ -30,7 +30,11 @@ class DownloadCommand extends ContainerAwareCommand
         $download = $repo->find($downloadId);
         $protocol = strtolower(explode(':', $download->getUrl())[0]);
         if (!in_array($protocol, ['http', 'https'])) {
-            $output->writeln("<error>Invalid protocol $protocol</error>");
+            $output->writeln("<error>Invalid protocol \"$protocol\"</error>");
+            return;
+        }
+        if (!$download->getFilename()) {
+            $output->writeln("<error>Empty filename</error>");
             return;
         }
         $saveFilename = $this->makeFilenameSave($download->getFilename());
