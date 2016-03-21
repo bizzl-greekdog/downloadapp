@@ -133,7 +133,11 @@ class ScanCommand extends ContainerAwareCommand
         $processBuilder
             ->addEnvironmentVariables($paths)
             ->add("{$appRoot}/scanner/node_modules/.bin/casperjs")
-            ->add("--engine={$engine}")
+            ->add("--engine={$engine}");
+        if ($cookies = $this->getContainer()->getParameter('cookies')) {
+            $processBuilder->add("--cookies-file={$cookies}");
+        }
+        $processBuilder
             ->add("{$appRoot}/scanner/scanner.js")
             ->add($url)
             ->add($referer);

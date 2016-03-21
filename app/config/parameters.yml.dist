@@ -24,6 +24,9 @@ parameters:
     # engine used by casperjs
     scanner_engine:    phantomjs
 
+    # Cookie file
+    cookies:           ~
+
     # config for some scanners
     scanners:
       deviantart:
