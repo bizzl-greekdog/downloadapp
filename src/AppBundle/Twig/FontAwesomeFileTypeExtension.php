@@ -31,12 +31,12 @@ class FontAwesomeFileTypeExtension extends \Twig_Extension
 
     public function getFileTypeIcon($mime)
     {
-        list($group, $type) = explode('/', $mime);
-
-        if ($group === 'image') {
-            return 'fa-file-image-o';
+        if (trim($mime)) {
+            list($group, $type) = explode('/', $mime);
+            if ($group === 'image') {
+                return 'fa-file-image-o';
+            }
         }
-
         return 'fa-file-o';
     }
 }
