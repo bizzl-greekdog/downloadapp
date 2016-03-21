@@ -24,9 +24,9 @@
 ###
 
 module.exports.identify = (url, referer, parameters, config) ->
-  if url == 'furaffinity:watchlist' or -1 < url.indexOf 'www.furaffinity.net/'
+  if url == 'furaffinity:watchlist' or -1 < url.indexOf('www.furaffinity.net/') or -1 < url.indexOf('/furaffinity.net/')
     url
-  else if -1 < referer.indexOf 'www.furaffinity.net/'
+  else if -1 < referer.indexOf('www.furaffinity.net/') or -1 < referer.indexOf('/furaffinity.net/')
     referer
   else
     false

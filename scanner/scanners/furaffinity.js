@@ -27,9 +27,9 @@
 
 (function() {
   module.exports.identify = function(url, referer, parameters, config) {
-    if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/')) {
+    if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/') || -1 < url.indexOf('/furaffinity.net/')) {
       return url;
-    } else if (-1 < referer.indexOf('www.furaffinity.net/')) {
+    } else if (-1 < referer.indexOf('www.furaffinity.net/') || -1 < referer.indexOf('/furaffinity.net/')) {
       return referer;
     } else {
       return false;
