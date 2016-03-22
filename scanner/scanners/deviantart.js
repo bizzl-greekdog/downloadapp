@@ -54,7 +54,7 @@
         };
       });
       this.thenBypassIf((function() {
-        return indexOf.call(this.page.url, 'users/login') >= 0;
+        return indexOf.call(this.getCurrentUrl(), 'users/login') < 0;
       }), 1);
       this.then(function() {
         return this.fill('form#login', {
