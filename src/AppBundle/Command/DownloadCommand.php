@@ -53,9 +53,13 @@ class DownloadCommand extends ContainerAwareCommand
             $this->downloadUrl($download->getUrl(), $filePath, $download->getReferer());
             file_put_contents($filePath . '.txt', $download);
             $output->writeln("   <info>Done</info>");
-            $download->setDownloaded(true);
+            $download
+                ->setDownloaded(true)
+                ->setFailed(false);
         } catch (\Exception $e) {
-            unlink($filePath);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
             $output->writeln("   <error>Failed</error>");
             $download->setFailed(true);
         }
