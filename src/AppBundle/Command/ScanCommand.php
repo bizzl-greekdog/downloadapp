@@ -30,14 +30,15 @@ class ScanCommand extends ContainerAwareCommand
             ->addOption('count', 'c', InputOption::VALUE_OPTIONAL, 'Number of entries to process (will be ignored if url is set)', 5)
             ->addOption('watchlists', '', InputOption::VALUE_NONE, 'Get watchlists')
             ->addOption('ipc', '', InputOption::VALUE_NONE, 'Pass notifications via stdout')
+            ->addOption('allow-dupes', '', InputOption::VALUE_NONE, 'Allow duplicate downloads')
             ->addArgument('url', null, 'url to scan', false)
             ->addArgument('referer', null, 'referer to include in scan', false);
     }
 
-    private function saveScan($scanned, $url, $referer, $autoOpen = false)
+    private function saveScan($scanned, $url, $referer, $autoOpen = false, $allowDupes = false)
     {
         if ($scanned['total']) {
-            $results = $this->saveDownloads($scanned['downloads']);
+            $results = $this->saveDownloads($scanned['downloads'], $allowDupes);
             $results['queued'] = $this->enqueueUrls($scanned['queued']);
             $this->successNotification($results, $url, $referer, $autoOpen);
         } else {
@@ -66,6 +67,7 @@ class ScanCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $url = $input->getArgument('url');
         $this->ipc = $input->getOption('ipc') ? $output : false;
+        $allowDupes = $input->getOption('allow-dupes');
         if ($input->getOption('watchlists')) {
             $scanners = $this->getContainer()->get('kernel')->getRootDir() . '/config/scanners.yml';
             $scanners = Yaml::parse(file_get_contents($scanners));
@@ -73,16 +75,16 @@ class ScanCommand extends ContainerAwareCommand
                 if (!isset($scanner['watchlist']) || !$scanner['watchlist']) {
                     continue;
                 }
-                $scanned = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['url'], $output);
-                $this->saveScan($scanned, $scanner['watchlist']['url'], '', true);
+                $scanned = $this->scan($scanner['watchlist']['key'], $scanner['watchlist']['url']);
+                $this->saveScan($scanned, $scanner['watchlist']['url'], '', true, $allowDupes);
             }
         } elseif ($url) {
             $referer = $input->getArgument('referer');
             if (!$referer) {
                 $referer = $url;
             }
-            $scanned = $this->scan($url, $referer, $output);
-            $this->saveScan($scanned, $url, $referer, false);
+            $scanned = $this->scan($url, $referer);
+            $this->saveScan($scanned, $url, $referer, false, $allowDupes);
         } else {
             $count = $input->getOption('count');
             $repo = $em->getRepository('AppBundle:QueuedUrl');
@@ -99,7 +101,7 @@ class ScanCommand extends ContainerAwareCommand
                 $url = $queuedUrl->getUrl();
                 $referer = $queuedUrl->getReferer();
                 $scanned = $this->scan($url, $referer);
-                $this->saveScan($scanned, $url, $referer, false);
+                $this->saveScan($scanned, $url, $referer, false, $allowDupes);
                 $em->remove($queuedUrl);
             }
         }
@@ -192,7 +194,8 @@ class ScanCommand extends ContainerAwareCommand
         $buffer->close();
 
         if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+            //throw new ProcessFailedException($process);
+            $logger->error('Scanner failed hard');
         }
 
         $stderr = $process->getErrorOutput();
@@ -226,7 +229,7 @@ class ScanCommand extends ContainerAwareCommand
         }
     }
 
-    private function saveDownloads(array $downloads)
+    private function saveDownloads(array $downloads, $allowDupes = false)
     {
         $logger = $this->getContainer()->get('logger');
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
@@ -238,13 +241,18 @@ class ScanCommand extends ContainerAwareCommand
                 ->setFilename($download['filename'])
                 ->setReferer($download['referer'])
                 ->setComment($download['comment']);
-            $existQuery = $em->getRepository('AppBundle:Download')
-                             ->createQueryBuilder('d')
-                             ->select('d.id')
-                             ->where('d.checksum = :checksum')
-                             ->getQuery();
-            $existQuery->execute(['checksum' => $downloadEntity->getChecksum()]);
-            if (count($existQuery->getArrayResult()) == 0) {
+            if (!$allowDupes) {
+                $existQuery = $em->getRepository('AppBundle:Download')
+                                 ->createQueryBuilder('d')
+                                 ->select('d.id')
+                                 ->where('d.checksum = :checksum')
+                                 ->getQuery();
+                $existQuery->execute(['checksum' => $downloadEntity->getChecksum()]);
+                $isDuplicate = count($existQuery->getArrayResult()) > 0;
+            } else {
+                $isDuplicate = false;
+            }
+            if (!$isDuplicate) {
                 foreach ($download['metadata'] as $title => $value) {
                     $downloadEntity->addMetadatum($title, $value);
                 }
