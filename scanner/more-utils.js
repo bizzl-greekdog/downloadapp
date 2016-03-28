@@ -4,6 +4,10 @@
     return text.replace(/[\t\f\r]/g, '').replace(/<br[^>]*>/g, '\n').replace(/<a[^>]*iconusername[^>]*>[^<]*<img[^>]*title="([^"]+)"[^>]*>[^<]*<\/a>/g, '$1').replace(/<(\/?[bisu])(?: [^>]*)?>/g, '[$1]').replace(/<[^>]+>/g, '').replace(/^[\t\n\f\r]*|[\t\n\f\r]*$/g, '').replace(/\n\n\n+/g, '\n\n').replace(/;([^ ])/g, '; $1').replace(/^\n+/, '').replace(/\[(\/?[bisu])]/g, '<$1>').replace(/&nbsp;/g, ' ').trim();
   };
 
+  module.exports.cleanFilename = function(filename) {
+    return filename.replace(/[<]/g, '(').replace(/[>]/g, ')').replace(/[ ]?:[ ]?/g, ' - ').replace(/"/g, '').replace(/[ ]?\/[ ]?/g, ' - ').replace(/[ ]?\\[ ]?/g, ' - ').replace(/[ ]?\|[ ]?/g, ' - ').replace(/[?]/g, '').replace(/[*]/g, '').replace(/[\x00-\x1f]/g, '');
+  };
+
   module.exports.PatternUrl = (function() {
     function PatternUrl(pattern, startValue, stepWidth) {
       this.pattern = pattern;
@@ -34,6 +38,9 @@
 
   module.exports.exportDownloads = function(casper, a) {
     return a.forEach(function(element) {
+      if (element.filename) {
+        element.filename = module.exports.cleanFilename(element.filename);
+      }
       return casper.echo('DOWNLOAD ' + JSON.stringify(element));
     });
   };

@@ -13,6 +13,19 @@ module.exports.cleanText = (text) ->
   .replace /&nbsp;/g, ' '
   .trim()
 
+module.exports.cleanFilename = (filename) ->
+  filename
+  .replace /[<]/g, '('
+  .replace /[>]/g, ')'
+  .replace /[ ]?:[ ]?/g, ' - '
+  .replace /"/g, ''
+  .replace /[ ]?\/[ ]?/g, ' - '
+  .replace /[ ]?\\[ ]?/g, ' - '
+  .replace /[ ]?\|[ ]?/g, ' - '
+  .replace /[?]/g, ''
+  .replace /[*]/g, ''
+  .replace /[\x00-\x1f]/g, ''
+
 class module.exports.PatternUrl
   constructor: (@pattern, startValue, @stepWidth) ->
     @i = startValue
@@ -31,6 +44,8 @@ module.exports.scanLine = ->
 
 module.exports.exportDownloads = (casper, a) ->
   a.forEach (element) ->
+    if element.filename
+      element.filename = module.exports.cleanFilename element.filename
     casper.echo 'DOWNLOAD ' + JSON.stringify(element)
 
 module.exports.enqueueUrls = (casper, urls) ->
