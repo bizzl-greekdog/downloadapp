@@ -25,20 +25,26 @@ class StatsService implements ContainerAwareInterface
             ->select('count(d.id)')
             ->where('d.downloaded = false')
             ->getQuery()
-            ->getSingleScalarResult();;
+            ->getSingleScalarResult();
         $downloaded = $total - $notDownloaded;
+        $failed = $downloadRepository
+            ->createQueryBuilder('d')
+            ->select('count(d.id)')
+            ->where('d.failed = true')
+            ->getQuery()
+            ->getSingleScalarResult();
         $enqueued = $em
             ->getRepository('AppBundle:QueuedUrl')
             ->createQueryBuilder('q')
             ->select('count(q.id)')
             ->getQuery()
             ->getSingleScalarResult();
-
         return [
             'Total'          => $total,
             'Downloaded'     => $downloaded,
             'Not Downloaded' => $notDownloaded,
             'Enqueued'       => $enqueued,
+            'Failed'         => $failed,
         ];
     }
 }
