@@ -30,14 +30,26 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
 
     /** @var  IoServer */
     protected $server;
+    
+    /** @var bool  */
+    private $silent = false;
 
     /**
      * AddonSocketListener constructor.
+     * @param OutputInterface $output
+     * @param bool $silent
      */
-    public function __construct(OutputInterface $output)
+    public function __construct(OutputInterface $output, $silent = false)
     {
         $this->clients = new \SplObjectStorage();
         $this->output = $output;
+        $this->silent = $silent;
+    }
+    
+    private function writeln($msg) {
+        if (!$this->silent) {
+            $this->output->writeln($msg);
+        }
     }
 
     /**
@@ -49,7 +61,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
     {
         $this->clients->attach($conn);
         $this->container->get('logger')->info("New connection! ({$conn->resourceId})");
-        $this->output->writeln("New connection! ({$conn->resourceId})");
+        $this->writeln("New connection! ({$conn->resourceId})");
     }
 
     /**
@@ -61,7 +73,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
     {
         $this->clients->detach($conn);
         $this->container->get('logger')->info("Connection {$conn->resourceId} has disconnected");
-        $this->output->writeln("Connection {$conn->resourceId} has disconnected");
+        $this->writeln("Connection {$conn->resourceId} has disconnected");
     }
 
     /**
@@ -74,7 +86,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
     function onError(ConnectionInterface $conn, \Exception $e)
     {
         $this->container->get('logger')->error("An error has occurred: {$e->getMessage()}");
-        $this->output->writeln("An error has occurred: {$e->getMessage()}");
+        $this->writeln("An error has occurred: {$e->getMessage()}");
         $this->clients->detach($conn);
         $conn->close();
     }
@@ -96,7 +108,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
             ->add('app:scan')
             ->add('--ipc');
 
-        $this->output->writeln($msg);
+        $this->writeln($msg);
         $msg = json_decode($msg);
         if ($msg->url == 'watchlists') {
             $processBuilder->add('--watchlists');

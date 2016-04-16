@@ -25,10 +25,13 @@ class ListenCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        $this->setName('app:listen')
-             ->setDescription('Listen for websocket requests (blocks indefinitely)')
-             ->addOption('port', 'p', InputOption::VALUE_REQUIRED, 'The port to listen on', 8888)
-             ->addOption('interface', 'i', InputOption::VALUE_REQUIRED, 'The interface to listen on', '0.0.0.0');
+        $this
+            ->setName('app:listen')
+            ->setDescription('Listen for websocket requests (blocks indefinitely)')
+            ->addOption('port', 'p', InputOption::VALUE_REQUIRED, 'The port to listen on', 8888)
+            ->addOption('interface', 'i', InputOption::VALUE_REQUIRED, 'The interface to listen on', '0.0.0.0')
+            ->addOption('quiet', 'q', InputOption::VALUE_NONE, 'Silent mode')
+            ->addOption('pidfile', 'f', InputOption::VALUE_OPTIONAL, 'Write process id to file', '');
     }
 
     /**
@@ -36,12 +39,25 @@ class ListenCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $addonSocketListener = new AddonSocketListener($output);
+        $pidfile = $input->getOption('pidfile');
+        $silent = $input->getOption('quiet');
+        $port = $input->getOption('port');
+        $address = $input->getOption('interface');
+
+        $addonSocketListener = new AddonSocketListener($output, $silent);
         $addonSocketListener->setContainer($this->getContainer());
-        $server = IoServer::factory(new HttpServer(new WsServer($addonSocketListener)), $input->getOption('port'), $input->getOption('interface'));
+        $server = IoServer::factory(new HttpServer(new WsServer($addonSocketListener)), $port, $address);
         $addonSocketListener->setServer($server);
-        $output->writeln(sprintf('Listening to %s:%s', $input->getOption('interface'), $input->getOption('port')));
+        if (!$silent) {
+            $output->writeln(sprintf('Listening to %s:%s', $address, $port));
+        }
+        if ($pidfile) {
+            file_put_contents($pidfile, getmypid());
+        }
         $server->run();
+        if ($pidfile) {
+            unlink($pidfile);
+        }
         return 0;
     }
 
