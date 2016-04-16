@@ -52,7 +52,7 @@ class Metadatum
      */
     public function setDownload(Download $download)
     {
-        $this->download = $download;
+        $this->download = isset($download) ? $download : '';
         return $this;
     }
 
@@ -70,7 +70,7 @@ class Metadatum
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        $this->title = isset($title) ? $title : '';
         return $this;
     }
 
@@ -88,7 +88,7 @@ class Metadatum
      */
     public function setValue($value)
     {
-        $this->value = $value;
+        $this->value = isset($value) ? $value : '';
         return $this;
     }
 
