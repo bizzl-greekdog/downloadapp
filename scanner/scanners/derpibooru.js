@@ -45,8 +45,12 @@
     return casper["do"](function() {
       this.start(url);
       this.then(function() {
-        var artist, comment, download, fileUrl, originalFilename, source;
+        var artist, comment, download, fileUrl, originalFilename, protocol, source;
         fileUrl = this.getElementAttribute('a[href*="/download/"][href*="__"]', 'href');
+        if (0 === fileUrl.indexOf('//')) {
+          protocol = this.getCurrentUrl().split(':')[0];
+          fileUrl = protocol + ":" + fileUrl;
+        }
         originalFilename = fileUrl.replace(/\?.*$/, '').split('/').pop();
         source = this.getElementAttribute('.source_url > a', 'href');
         if (source) {

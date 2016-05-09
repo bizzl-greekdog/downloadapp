@@ -3,6 +3,7 @@
 namespace AppBundle\Command;
 
 use Guzzle\Http\Client;
+use Guzzle\Plugin\Cookie\CookieJar\FileCookieJar;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -60,9 +61,11 @@ class DownloadCommand extends ContainerAwareCommand
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
+            $this->getContainer()->get('logger')->addError($e->getMessage());
             $output->writeln("   <error>Failed</error>");
             $download->setFailed(true);
         }
+        $download->getChecksum();
         $em->persist($download);
     }
 
@@ -138,14 +141,17 @@ class DownloadCommand extends ContainerAwareCommand
     {
         static $client = null;
         if (!isset($client)) {
-            $client = new Client(['headers' => ['X-Clacks-Overhead: GNU Terry Pratchett']]);
+            $client = new Client(
+                [
+                    'headers' => ['X-Clacks-Overhead: GNU Terry Pratchett'],
+                    'cookies' => new FileCookieJar($this->getContainer()->getParameter('cookies'))
+                ]
+            );
         }
         $options = [];
-        if (isset($referer)) {
-            $options['headers'] = ['referer' => $referer];
-        }
-        $client->get($url, $options)
-               ->setResponseBody($target)
-               ->send();
+        $response = $client->get($url, $options)
+                           ->setResponseBody($target)
+                           ->setHeader('Referer', $referer)
+                           ->send();
     }
 }

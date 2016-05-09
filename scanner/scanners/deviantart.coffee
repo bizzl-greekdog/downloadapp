@@ -47,7 +47,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
       @page.onResourceRequested = (requestData, request) ->
         if -1 == requestData['url'].indexOf 'deviantart.com/'
           request.abort()
-    @thenBypassIf (-> 'users/login' not in @getCurrentUrl()), 1
+    @thenBypassIf (-> -1 == @getCurrentUrl().indexOf 'users/login'), 1
     @then ->
       @fill 'form#login', {
         'username': parameters.user

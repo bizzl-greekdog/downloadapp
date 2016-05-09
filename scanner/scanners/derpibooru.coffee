@@ -39,6 +39,9 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
     @start url
     @then ->
       fileUrl = @getElementAttribute 'a[href*="/download/"][href*="__"]', 'href'
+      if 0 == fileUrl.indexOf '//'
+        protocol = @getCurrentUrl().split(':')[0]
+        fileUrl = "#{protocol}:#{fileUrl}"
       originalFilename = fileUrl.replace(/\?.*$/, '').split('/').pop()
       source = @getElementAttribute '.source_url > a', 'href'
       if source

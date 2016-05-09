@@ -26,8 +26,6 @@
  */
 
 (function() {
-  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
   module.exports.identify = function(url, referer, parameters, config) {
     if (url === 'deviantart:watchlist' || -1 < url.indexOf('deviantart.com/')) {
       return url;
@@ -54,7 +52,7 @@
         };
       });
       this.thenBypassIf((function() {
-        return indexOf.call(this.getCurrentUrl(), 'users/login') < 0;
+        return -1 === this.getCurrentUrl().indexOf('users/login');
       }), 1);
       this.then(function() {
         return this.fill('form#login', {
