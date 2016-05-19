@@ -112,7 +112,7 @@
           }
         });
         if (processed) {
-          this.click('a.more');
+          this.click('a.more, a.more-half:not(.prev)');
           return this.then(function() {
             return this.goto('WATCHLIST');
           });

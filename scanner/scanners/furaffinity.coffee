@@ -92,7 +92,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
           downloadQueue.push image
           processed++
       if processed
-        @click 'a.more'
+        @click 'a.more, a.more-half:not(.prev)'
         @then ->
           @goto 'WATCHLIST'
       else
