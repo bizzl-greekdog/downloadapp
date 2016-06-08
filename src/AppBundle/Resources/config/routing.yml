@@ -14,6 +14,10 @@ app_download:
     path: /download/{id}
     defaults: { _controller: AppBundle:Default:download }
 
+app_delete:
+    path: /delete/{id}
+    defaults: { _controller: AppBundle:Default:delete }
+
 app_notification:
     path: /notification/{id}
     defaults: { _controller: AppBundle:Default:notification, id: -1 }

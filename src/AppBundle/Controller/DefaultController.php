@@ -77,6 +77,16 @@ class DefaultController extends Controller
         return $this->redirect($request->headers->get('referer'));
     }
 
+    public function deleteAction(Request $request, $id)
+    {
+        $em = $this->get('doctrine.orm.entity_manager');
+        $repo = $em->getRepository('AppBundle:Download');
+        $download = $repo->find($id);
+        $em->remove($download);
+        $em->flush();
+        return $this->redirect($request->headers->get('referer'));
+    }
+
     public function notificationAction($id)
     {
         $notification = $this

@@ -22,6 +22,7 @@
                     </td>
                     <td class="action">
                         <a href="{{ path('app_download', {id: download.id}) }}" class="fa fa-play"></a>
+                        <a href="{{ path('app_delete', {id: download.id}) }}" class="fa fa-remove" onclick="return window.confirm('Remove {{ download.filename }}?')"></a>
                     </td>
                 </tr>
             {% endfor %}
