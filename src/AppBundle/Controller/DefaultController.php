@@ -3,8 +3,11 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Command\DownloadCommand;
+use AppBundle\Entity\Download;
+use AppBundle\Entity\Metadatum;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
@@ -101,5 +104,24 @@ class DefaultController extends Controller
                 'stats'        => $this->container->get('app.stats')->getStats(),
             ]
         );
+    }
+
+    public function putDownloadAction(Request $request)
+    {
+        $json = json_decode($request->getContent(), JSON_OBJECT_AS_ARRAY);
+        $download = new Download();
+        $download
+            ->setUrl($json['url'])
+            ->setComment($json['comment'])
+            ->setFilename($json['filename'])
+            ->setReferer($json['referer']);
+        foreach ($json['metadata'] as $key => $value) {
+            $download->addMetadatum($key, $value);
+        }
+        $download->getChecksum();
+        $em = $this->container->get('doctrine.orm.default_entity_manager');
+        $em->persist($download);
+        $em->flush();
+        return new JsonResponse(['status' => 'ok']);
     }
 }

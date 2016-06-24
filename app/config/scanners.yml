@@ -5,10 +5,10 @@ scanners:
             url: http://www.deviantart.com/notifications/#view=deviations
     apod:
         watchlist: false
-    furaffinity:
-        watchlist:
-            key: furaffinity:watchlist
-            url: http://www.furaffinity.net/msg/submissions/
+    #furaffinity:
+    #    watchlist:
+    #        key: furaffinity:watchlist
+    #        url: http://www.furaffinity.net/msg/submissions/
     blogspot:
         watchlist: false
         domains:
@@ -30,3 +30,5 @@ scanners:
             url: https://www.weasyl.com/messages/submissions
     inkbunny:
         watchlist: false
+#    pixiv:
+#        watchlist: false

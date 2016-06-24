@@ -2,6 +2,11 @@ app_list_all_downloads_first_page:
     path:     /all
     defaults: { _controller: AppBundle:Default:all, page: 1 }
 
+app_put_download:
+    path: /put
+    defaults: { _controller: AppBundle:Default:putDownload }
+    methods:  [PUT, POST]
+
 app_list_downloads:
     path:     /{page}
     defaults: { _controller: AppBundle:Default:index, page: 1 }
