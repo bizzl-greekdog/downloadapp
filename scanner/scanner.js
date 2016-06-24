@@ -26,7 +26,7 @@
  */
 
 (function() {
-  var HERE, YAML, casper, config, fs, identified, moreUtilities, parameters, referer, scanner, scannerFile, scannerModule, scanners, system, url, utilities;
+  var HERE, YAML, casper, config, fs, identified, moreUtilities, parameters, parametersFile, parametersYaml, referer, scanner, scannerFile, scannerModule, scanners, system, url, utilities;
 
   system = require('system');
 
@@ -40,7 +40,7 @@
 
   casper = require(HERE + '/loopy-casper').create({
     pageSettings: {
-      loadImages: false,
+      loadImages: true,
       loadPlugins: false
     },
     verbose: true,
@@ -53,9 +53,13 @@
 
   YAML = require(HERE + '/node_modules/yamljs/index');
 
-  parameters = fs.read(HERE + '/../app/config/parameters.yml');
+  parametersFile = fs.read(HERE + '/../app/config/parameters.yml');
 
-  parameters = YAML.parse(parameters).parameters.scanners;
+  parametersYaml = YAML.parse(parametersFile);
+
+  casper.userAgent(parametersYaml.parameters.user_agent);
+
+  parameters = parametersYaml.parameters.scanners;
 
   scanners = fs.read(HERE + '/../app/config/scanners.yml');
 

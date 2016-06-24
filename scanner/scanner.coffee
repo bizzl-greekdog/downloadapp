@@ -32,7 +32,7 @@ HERE = HERE.join '/'
 
 casper = require(HERE + '/loopy-casper').create {
   pageSettings:
-    loadImages: false
+    loadImages: true
     loadPlugins: false
   verbose: true
   logLevel: 'debug'
@@ -42,8 +42,10 @@ utilities = require 'utils'
 moreUtilities = require HERE + '/more-utils'
 YAML = require HERE + '/node_modules/yamljs/index'
 
-parameters = fs.read HERE + '/../app/config/parameters.yml'
-parameters = YAML.parse(parameters).parameters.scanners
+parametersFile = fs.read HERE + '/../app/config/parameters.yml'
+parametersYaml = YAML.parse(parametersFile)
+casper.userAgent parametersYaml.parameters.user_agent
+parameters = parametersYaml.parameters.scanners
 
 scanners = fs.read HERE + '/../app/config/scanners.yml'
 scanners = YAML.parse(scanners).scanners
