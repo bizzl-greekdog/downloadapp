@@ -5,6 +5,7 @@ namespace AppBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class StatsCommand extends ContainerAwareCommand
@@ -17,6 +18,7 @@ class StatsCommand extends ContainerAwareCommand
     {
         $this
             ->setName('app:stats')
+            ->addArgument('field', null, 'output only this field', false)
             ->setDescription('Get some stats');
     }
 
@@ -27,11 +29,16 @@ class StatsCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $table = new Table($output);
+        $field = $input->getArgument('field');
         $stats = $this->getContainer()->get('app.stats')->getStats();
-        foreach ($stats as $stat => $statValue) {
-            $table->addRow([$stat, $statValue]);
+        if (!$field) {
+            $table = new Table($output);
+            foreach ($stats as $stat => $statValue) {
+                $table->addRow([$stat, $statValue]);
+            }
+            $table->render();
+        } else {
+            print $stats[$field];
         }
-        $table->render();
     }
 }
