@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Command\DownloadCommand;
 use AppBundle\Entity\Download;
 use AppBundle\Entity\Metadatum;
+use AppBundle\Entity\Notification;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -108,20 +109,44 @@ class DefaultController extends Controller
 
     public function putDownloadAction(Request $request)
     {
-        $json = json_decode($request->getContent(), JSON_OBJECT_AS_ARRAY);
-        $download = new Download();
-        $download
-            ->setUrl($json['url'])
-            ->setComment($json['comment'])
-            ->setFilename($json['filename'])
-            ->setReferer($json['referer']);
-        foreach ($json['metadata'] as $key => $value) {
-            $download->addMetadatum($key, $value);
+        $items = json_decode($request->getContent(), JSON_OBJECT_AS_ARRAY);
+        if (isset($items['url'])) {
+            $items = [$items];
         }
-        $download->getChecksum();
+
         $em = $this->container->get('doctrine.orm.default_entity_manager');
-        $em->persist($download);
+        $skipped = 0;
+        $saved = 0;
+        foreach ($items as $item) {
+            $downloadEntity = new Download();
+            $downloadEntity
+                ->setUrl($item['url'])
+                ->setComment($item['comment'])
+                ->setFilename($item['filename'])
+                ->setReferer($item['referer']);
+            foreach ($item['metadata'] as $key => $value) {
+                $downloadEntity->addMetadatum($key, $value);
+            }
+            $existQuery = $em->getRepository('AppBundle:Download')
+                             ->createQueryBuilder('d')
+                             ->select('d.id')
+                             ->where('d.checksum = :checksum')
+                             ->getQuery();
+            $existQuery->execute(['checksum' => $downloadEntity->getChecksum()]);
+            if (count($existQuery->getArrayResult()) === 0) {
+                $em->persist($downloadEntity);
+                $saved++;
+            } else {
+                $skipped++;
+            }
+        }
+        $notification = new Notification($saved > 100);
+        $notification
+            ->setType('info')
+            ->setTitle('Scan successful')
+            ->setText("{$saved} saved, {$skipped} skipped, 0 enqueued");
+        $em->persist($notification);
         $em->flush();
-        return new JsonResponse(['status' => 'ok']);
+        return new JsonResponse($notification);
     }
 }
