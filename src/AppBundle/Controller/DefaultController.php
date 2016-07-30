@@ -139,6 +139,9 @@ class DefaultController extends Controller
             } else {
                 $skipped++;
             }
+            if (($saved + $skipped) % 500 === 0) {
+                $em->flush();
+            }
         }
         $notification = new Notification($saved > 100);
         $notification
