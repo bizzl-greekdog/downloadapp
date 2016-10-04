@@ -45,7 +45,8 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
       @page.onResourceRequested = (requestData, request) ->
         if -1 == requestData['url'].indexOf 'inkbunny.net/'
           request.abort()
-    @thenBypassIf (-> @getCurrentUrl() != 'https://inkbunny.net/error.php'), 2
+    @waitForSelector '#nav_bottom', (->), (->)
+    @thenBypassIf (-> @getCurrentUrl().indexOf('error.php') == -1), 2
     @then ->
       @open 'https://inkbunny.net/login.php'
       @then ->

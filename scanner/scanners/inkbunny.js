@@ -51,8 +51,9 @@
           }
         };
       });
+      this.waitForSelector('#nav_bottom', (function() {}), (function() {}));
       this.thenBypassIf((function() {
-        return this.getCurrentUrl() !== 'https://inkbunny.net/error.php';
+        return this.getCurrentUrl().indexOf('error.php') === -1;
       }), 2);
       this.then(function() {
         this.open('https://inkbunny.net/login.php');
