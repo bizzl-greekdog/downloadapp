@@ -8,3 +8,12 @@ services:
         class: AppBundle\Services\StatsService
         calls:
             - [setContainer, [ '@service_container' ]]
+
+    app.scanner:
+      class: AppBundle\Services\ScanService
+      arguments:
+        - @doctrine.orm.entity_manager
+        - @logger
+        - "%scanner_engine%"
+        - "%kernel.root_dir%/.."
+        - "%%cookies%"

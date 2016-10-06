@@ -120,6 +120,11 @@ class Download
      */
     public function setFilename($filename)
     {
+        $filename = str_replace(
+            ['<', '>', ':',   '"', '/',   '\\',  '|',   '?', '*'],
+            ['(', ')', ' - ', "'", ' - ', ' - ', ' - ', '',  '+'],
+            $filename
+        );
         $this->filename = $filename;
         return $this;
     }
