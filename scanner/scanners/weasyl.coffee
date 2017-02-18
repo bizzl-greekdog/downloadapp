@@ -70,14 +70,14 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
         @open config.watchlist.url
         @goto 'WATCHLIST'
       else
-        path = url.split '/'
-        if path[3] in ['submission', 'character']
+        path = url.replace(/^https?:\/\//, '').split '/'
+        if [x for x in ['submission', 'character'] when x in path].length
           downloadQueue.push url
-        else if path[3] in ['submissions', 'collections', 'favorites', 'characters']
+        else if [x for x in ['submissions', 'collections', 'favorites', 'characters'] when x in path].length
           @open url
           @goto 'GALLERY'
           return
-        else if path[3] in ['profile', 'user']
+        else if [x for x in ['profile', 'user'] when x in path].length
           checkQueue.push 'https://www.weasyl.com/submissions/' + path[4]
           checkQueue.push 'https://www.weasyl.com/characters/' + path[4]
         else if '~' == path[3].charAt 0
@@ -137,7 +137,16 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
             title = @fetchText('#detail-bar-title').trim()
             artist = @fetchText('#db-user .username').trim()
             fileExt = fileUrl.split('.').pop().replace /\?.*$/, ''
-            fileNr = url.split('/')[4]
+            fileNr = false
+            for fragment in url.split('/')
+              @echo fragment
+              if fileNr
+                fileNr = fragment
+                break
+              else if fragment == 'submissions'
+                fileNr = true
+            if not fileNr
+              fileNr = url.split('/')[4]
             fileTitle = title.toLowerCase().replace(/['"\n]/g, '').replace /[ ]/g, '_'
             fileName = "weasyl_#{fileNr}_#{fileTitle}_by_#{artist}.#{fileExt}"
           downloadItem =

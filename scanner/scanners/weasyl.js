@@ -67,7 +67,7 @@
       });
       this.label('ANALYZE');
       this.then(function() {
-        var path, ref, ref1, ref2;
+        var path, x;
         url = checkQueue.shift();
         if (!url) {
           if (downloadQueue.length > 1000) {
@@ -84,14 +84,53 @@
           this.open(config.watchlist.url);
           return this.goto('WATCHLIST');
         } else {
-          path = url.split('/');
-          if ((ref = path[3]) === 'submission' || ref === 'character') {
+          path = url.replace(/^https?:\/\//, '').split('/');
+          if ([
+            (function() {
+              var i, len, ref, results;
+              ref = ['submission', 'character'];
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                x = ref[i];
+                if (indexOf.call(path, x) >= 0) {
+                  results.push(x);
+                }
+              }
+              return results;
+            })()
+          ].length) {
             downloadQueue.push(url);
-          } else if ((ref1 = path[3]) === 'submissions' || ref1 === 'collections' || ref1 === 'favorites' || ref1 === 'characters') {
+          } else if ([
+            (function() {
+              var i, len, ref, results;
+              ref = ['submissions', 'collections', 'favorites', 'characters'];
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                x = ref[i];
+                if (indexOf.call(path, x) >= 0) {
+                  results.push(x);
+                }
+              }
+              return results;
+            })()
+          ].length) {
             this.open(url);
             this.goto('GALLERY');
             return;
-          } else if ((ref2 = path[3]) === 'profile' || ref2 === 'user') {
+          } else if ([
+            (function() {
+              var i, len, ref, results;
+              ref = ['profile', 'user'];
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                x = ref[i];
+                if (indexOf.call(path, x) >= 0) {
+                  results.push(x);
+                }
+              }
+              return results;
+            })()
+          ].length) {
             checkQueue.push('https://www.weasyl.com/submissions/' + path[4]);
             checkQueue.push('https://www.weasyl.com/characters/' + path[4]);
           } else if ('~' === path[3].charAt(0)) {
@@ -159,7 +198,7 @@
         } else {
           this.open(url);
           return this.then(function() {
-            var artist, comment, downloadItem, fileExt, fileName, fileNr, fileTitle, fileUrl, title;
+            var artist, comment, downloadItem, fileExt, fileName, fileNr, fileTitle, fileUrl, fragment, i, len, ref, title;
             url = this.getCurrentUrl();
             fileUrl = this.getElementAttribute('#detail-actions a[href*=submission], #detail-actions a[href*=submit]', 'href');
             if (fileUrl === null) {
@@ -169,7 +208,21 @@
               title = this.fetchText('#detail-bar-title').trim();
               artist = this.fetchText('#db-user .username').trim();
               fileExt = fileUrl.split('.').pop().replace(/\?.*$/, '');
-              fileNr = url.split('/')[4];
+              fileNr = false;
+              ref = url.split('/');
+              for (i = 0, len = ref.length; i < len; i++) {
+                fragment = ref[i];
+                this.echo(fragment);
+                if (fileNr) {
+                  fileNr = fragment;
+                  break;
+                } else if (fragment === 'submissions') {
+                  fileNr = true;
+                }
+              }
+              if (!fileNr) {
+                fileNr = url.split('/')[4];
+              }
               fileTitle = title.toLowerCase().replace(/['"\n]/g, '').replace(/[ ]/g, '_');
               fileName = "weasyl_" + fileNr + "_" + fileTitle + "_by_" + artist + "." + fileExt;
             }
