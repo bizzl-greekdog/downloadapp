@@ -27,7 +27,9 @@
 
 (function() {
   module.exports.identify = function(url, referer, parameters, config) {
-    if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/') || -1 < url.indexOf('/furaffinity.net/')) {
+    if (-1 < url.indexOf('furaffinity.net/msg/submissions')) {
+      return 'furaffinity:watchlist';
+    } else if (url === 'furaffinity:watchlist' || -1 < url.indexOf('www.furaffinity.net/') || -1 < url.indexOf('/furaffinity.net/')) {
       return url;
     } else if (-1 < referer.indexOf('www.furaffinity.net/') || -1 < referer.indexOf('/furaffinity.net/')) {
       return referer;
@@ -37,24 +39,31 @@
   };
 
   module.exports.run = function(casper, utilities, moreUtilities, parameters, config, url) {
-    var checkQueue, downloadQueue;
+    var captcha, checkQueue, downloadQueue;
     checkQueue = [url];
     downloadQueue = [];
+    captcha = '';
     return casper["do"](function() {
       this.start('http://www.furaffinity.net/msg/others');
       this.thenBypassIf((function() {
         return !this.exists('a[href="/login/"]');
-      }), 3);
+      }), 4);
       this.then(function() {
         this.log('Not logged in', 'info');
         return this.click('a[href="/login/"]');
       });
       this.waitForSelector('form');
       this.then(function() {
+        this.capture('/tmp/captcha.png');
+        return this.echo('Please solve captcha located at /tmp/captcha.png');
+      });
+      this.subProcess(['solve-captcha', '/tmp/captcha.png'], function(error, stdout, stderr) {
+        captcha = stdout;
         this.log('Logging in', 'info');
         return this.fill('form', {
           'name': parameters.user,
-          'pass': parameters.password
+          'pass': parameters.password,
+          'captcha': captcha
         }, true);
       });
       this.label('ANALYZE');
@@ -174,7 +183,7 @@
           this.open(url);
           return this.then(function() {
             var artist, comment, downloadItem, fileName, fileUrl, title;
-            url = this.page.url;
+            url = this.getCurrentUrl();
             fileUrl = 'http:' + this.getElementAttribute('a[href*=facdn]', 'href');
             title = this.getHTML('#page-submission td.cat b');
             artist = this.fetchText('#page-submission td.cat a[href*=user]');

@@ -24,7 +24,9 @@
 ###
 
 module.exports.identify = (url, referer, parameters, config) ->
-  if url == 'furaffinity:watchlist' or -1 < url.indexOf('www.furaffinity.net/') or -1 < url.indexOf('/furaffinity.net/')
+  if -1 < url.indexOf('furaffinity.net/msg/submissions')
+    return 'furaffinity:watchlist'
+  else if url == 'furaffinity:watchlist' or -1 < url.indexOf('www.furaffinity.net/') or -1 < url.indexOf('/furaffinity.net/')
     url
   else if -1 < referer.indexOf('www.furaffinity.net/') or -1 < referer.indexOf('/furaffinity.net/')
     referer
@@ -34,19 +36,26 @@ module.exports.identify = (url, referer, parameters, config) ->
 module.exports.run = (casper, utilities, moreUtilities, parameters, config, url) ->
   checkQueue = [url]
   downloadQueue = []
+  captcha = ''
 
   casper.do ->
     @start 'http://www.furaffinity.net/msg/others'
-    @thenBypassIf (-> !@exists('a[href="/login/"]')), 3
+    @thenBypassIf (-> !@exists('a[href="/login/"]')), 4
     @then ->
       @log 'Not logged in', 'info'
       @click 'a[href="/login/"]'
     @waitForSelector 'form'
+    #@waitForUrl 'http://www.furaffinity.net/msg/others', null, null, 500000
     @then ->
+      @capture '/tmp/captcha.png'
+      @echo 'Please solve captcha located at /tmp/captcha.png'
+    @subProcess ['solve-captcha', '/tmp/captcha.png'], (error, stdout, stderr) ->
+      captcha = stdout
       @log 'Logging in', 'info'
       @fill 'form', {
         'name': parameters.user
         'pass': parameters.password
+        'captcha': captcha
       }, true
     @label 'ANALYZE'
     @then ->
@@ -140,7 +149,7 @@ module.exports.run = (casper, utilities, moreUtilities, parameters, config, url)
       else
         @open url
         @then ->
-          url = @page.url
+          url = @getCurrentUrl()
           fileUrl = 'http:' + @getElementAttribute('a[href*=facdn]', 'href')
           title = @getHTML '#page-submission td.cat b'
           artist = @fetchText '#page-submission td.cat a[href*=user]'

@@ -143,15 +143,23 @@ class DownloadCommand extends ContainerAwareCommand
         if (!isset($client)) {
             $client = new Client(
                 [
-                    'headers' => ['X-Clacks-Overhead: GNU Terry Pratchett'],
+                    'headers' => [ 'X-Clacks-Overhead: GNU Terry Pratchett'],
                     'cookies' => new FileCookieJar($this->getContainer()->getParameter('cookies'))
                 ]
             );
         }
         $options = [];
-        $response = $client->get($url, $options)
-                           ->setResponseBody($target)
-                           ->setHeader('Referer', $referer)
-                           ->send();
+        try {
+            $encoded_url = preg_replace_callback('#://([^/]+)/([^?]+)#', function ($match) {
+                return '://' . $match[1] . '/' . join('/', array_map('rawurlencode', explode('/', $match[2])));
+            }, $url);
+            $response = $client->get($encoded_url, $options)
+                            ->setResponseBody($target)
+                            ->setHeader('Referer', $referer)
+                            ->send();
+        } catch (\Exception $e) {
+            //die($e->getMessage());
+            file_put_contents($url, $target);
+        }
     }
 }

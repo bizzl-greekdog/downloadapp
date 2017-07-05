@@ -56,14 +56,14 @@ class ScanCommand extends ContainerAwareCommand
                 if (!isset($scanner['watchlist']) || !$scanner['watchlist']) {
                     continue;
                 }
-                $notifications = $scanService->scan(
+                $notifications = array_merge($notifications, $scanService->scan(
                     $scanner['watchlist']['key'],
                     $scanner['watchlist']['url'],
                     true,
                     $allowDupes,
                     $scanner['watchlist']['url'],
                     ''
-                );
+                ));
             }
         } elseif ($url) {
             $referer = $input->getArgument('referer');
@@ -90,10 +90,10 @@ class ScanCommand extends ContainerAwareCommand
                 $em->remove($queuedUrl);
             }
         }
+        $em->flush();
         foreach ($notifications as $notification) {
             $this->sendNotification($notification);
         }
-        $em->flush();
 
         return 0;
     }

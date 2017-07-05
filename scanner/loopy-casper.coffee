@@ -8,6 +8,16 @@ f = utils.format
 LoopyCasper = -> LoopyCasper.super_.apply @, arguments
 utils.inherits LoopyCasper, Casper
 
+LoopyCasper.prototype.subProcess = (cmd, callback) ->
+  @then ->
+    cp = require 'child_process'
+    finished = false
+    self = @
+    cp.execFile cmd[0], cmd[1..], {}, (error, stdout, stderr) ->
+      finished = true
+      callback.call self, error, stdout, stderr
+    @waitFor ( -> finished), null, null, 3600000
+
 ###
  * Revised checkStep() function for realizing label() and goto()
  * Every revised points are commented.

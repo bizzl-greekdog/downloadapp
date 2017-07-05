@@ -17,6 +17,22 @@
 
   utils.inherits(LoopyCasper, Casper);
 
+  LoopyCasper.prototype.subProcess = function(cmd, callback) {
+    return this.then(function() {
+      var cp, finished, self;
+      cp = require('child_process');
+      finished = false;
+      self = this;
+      cp.execFile(cmd[0], cmd.slice(1), {}, function(error, stdout, stderr) {
+        finished = true;
+        return callback.call(self, error, stdout, stderr);
+      });
+      return this.waitFor((function() {
+        return finished;
+      }), null, null, 3600000);
+    });
+  };
+
 
   /*
    * Revised checkStep() function for realizing label() and goto()
@@ -27,7 +43,7 @@
    */
 
   LoopyCasper.prototype.checkStep = function(self, onComplete) {
-    var err, error, step;
+    var err, error1, step;
     if (!self.pendingWait && !self.loadInProgress) {
       self.current = self.step;
       step = self.steps[self.step++];
@@ -42,8 +58,8 @@
         if (utils.isFunction(onComplete)) {
           try {
             return onComplete.call(self, self);
-          } catch (error) {
-            err = error;
+          } catch (error1) {
+            err = error1;
             return self.log(f('Could not complete final step: %s', err), 'error');
           }
         } else {
@@ -63,7 +79,7 @@
    */
 
   LoopyCasper.prototype.then = function(step) {
-    var e, error, insertIndex;
+    var e, error1, insertIndex;
     if (!this.started) {
       throw new CasperError('Casper not started; please use Casper#start');
     }
@@ -79,8 +95,8 @@
       if (!this.steps[this.current].executed) {
         try {
           step.level = this.steps[this.current].level + 1;
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           step.level = 0;
         }
         insertIndex = this.step;

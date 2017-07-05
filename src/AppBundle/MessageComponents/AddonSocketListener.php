@@ -30,7 +30,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
 
     /** @var  IoServer */
     protected $server;
-    
+
     /** @var bool  */
     private $silent = false;
 
@@ -45,7 +45,7 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
         $this->output = $output;
         $this->silent = $silent;
     }
-    
+
     private function writeln($msg) {
         if (!$this->silent) {
             $this->output->writeln($msg);
@@ -118,11 +118,13 @@ class AddonSocketListener implements MessageComponentInterface, ContainerAwareIn
                 ->add($msg->referer);
         }
 
+        $writeln = [$this, 'writeln'];
         $buffer = new ProcessBuffer(
-            function ($line) use ($from) {
+            function ($line) use ($from, $writeln) {
                 if (substr($line, 0, 12) == 'NOTIFICATION') {
                     $from->send(substr($line, 13));
                 }
+                call_user_func($writeln, $line);
                 $this->getServer()->loop->tick();
             }
         );
