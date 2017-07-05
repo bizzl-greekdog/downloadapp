@@ -159,7 +159,7 @@ class DownloadCommand extends ContainerAwareCommand
                             ->send();
         } catch (\Exception $e) {
             //die($e->getMessage());
-            file_put_contents($url, $target);
+            file_put_contents($target, $url);
         }
     }
 }
